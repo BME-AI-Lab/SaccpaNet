@@ -1,0 +1,20 @@
+*.png
+*.ckpt
+*.pyc
+__pycache__/
+lightining_logs/
+.ipynb_checkpoints/
+*.tfevents.*
+hparams.yaml
+tmp_script/
+**/debagger/
+*.pickle
+*keypoints.json
+wrong cases
+classification report.txt
+confusion matrix.txt
+"wrong cases.txt"
+*.avi
+*.txt
+"wrong cases"
+_old_*/
