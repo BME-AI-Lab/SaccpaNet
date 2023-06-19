@@ -44,7 +44,7 @@ class MyLightningModule(ClassificationModule):
             in_channels=18, out_channels=18, kernel_size=3, padding="valid"
         ).cuda()
         self.net = SegNext()
-        self.classify_net = eca_resnet50(num_classes=7)  # (num_classes = 7)
+        # self.classify_net = eca_resnet50(num_classes=7)  # (num_classes = 7)
         self.joint_loss = JointsMSELoss(use_target_weight=True)
         self.classification_loss = nn.CrossEntropyLoss()  # label_smoothing=0.001)
         # self.dense = nn.Linear(1000,7)#input_size[0]*input_size[1]
