@@ -1,0 +1,1 @@
+python directory_runs --run_dir ./runs_andy3 --source_dir ./16-fine_tuning_classification --work_dir ./tmp --store_dir ./tmp python finetune_classification.py
