@@ -19,7 +19,7 @@ torch.__version__
 from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
-from lib.modules.modules import Network
+from lib.modules._old_models.modules import Network
 from lib.modules.core.sampler import sample_cfgs, generate_regnet_full
 from config import seed
 

@@ -3,7 +3,7 @@ import torch.nn as nn
 import math
 import warnings
 from torch.nn.modules.utils import _pair as to_2tuple
-from .core.sampler import generate_regnet_full
+from ..modules.core.sampler import generate_regnet_full
 
 # from mmcv.cnn import build_norm_layer
 BaseModule = nn.Module
