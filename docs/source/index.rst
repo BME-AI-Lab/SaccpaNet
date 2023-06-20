@@ -10,6 +10,7 @@ Welcome to Posture Experiment's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   project_organization
    code_running.md
    reference_index
 

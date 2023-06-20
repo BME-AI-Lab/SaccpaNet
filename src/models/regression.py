@@ -13,7 +13,6 @@ torch.__version__
 #!git clone https://github.com/lukemelas/EfficientNet-PyTorch
 
 # %%
-from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
 from lib.modules._old_models.modules import Network
@@ -21,10 +20,7 @@ from .config import *
 
 # %%
 import pytorch_lightning as pl
-import torchvision.models as models
 from torch import nn
-from torch.nn import functional as F
-from torch.utils.data.dataloader import DataLoader
 
 
 # from efficientnet_pytorch import EfficientNet

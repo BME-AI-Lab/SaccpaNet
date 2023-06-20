@@ -23,6 +23,10 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "myst_parser",
+    "sphinx_copybutton",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.viewcode",
+    "sphinx_markdown_tables",
 ]
 
 

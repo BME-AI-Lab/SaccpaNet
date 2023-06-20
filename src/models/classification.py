@@ -1,8 +1,5 @@
 import pytorch_lightning as pl
-import torchvision.models as models
 from torch import nn
-from torch.nn import functional as F
-from torch.utils.data.dataloader import DataLoader
 import torch
 from .config import *
 

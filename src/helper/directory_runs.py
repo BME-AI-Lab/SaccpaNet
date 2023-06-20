@@ -8,6 +8,7 @@ from os.path import join
 import argparse
 from contextlib import contextmanager
 from tkinter import filedialog
+from tqdm import tqdm
 
 
 def get_temp_directory():
@@ -71,8 +72,17 @@ def ask_if_none(arg_name, default, file=False):
     return default
 
 
+def patch_tqdm():
+    from .notification import get_telegram_tqdm
+
+    global tqdm
+    tqdm = get_telegram_tqdm()
+
+
 def resolve_arguments(args):
     arg_dict = vars(args)
+    if args.notify:
+        patch_tqdm()
     work_dir, source_dir, run_dir, store_dir = (
         ask_if_none(arg_name, arg_dict[arg_name])
         for arg_name in ["work_dir", "source_dir", "run_dir", "store_dir"]
@@ -137,6 +147,7 @@ if __name__ == "__main__":
     parser.add_argument("--source_dir", type=pathlib.Path)
     parser.add_argument("--work_dir", type=pathlib.Path)
     parser.add_argument("--store_dir", type=pathlib.Path)
+    parser.add_argument("-n", "--notify", action="store_true")
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     main(args)

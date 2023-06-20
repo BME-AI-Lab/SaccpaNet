@@ -1,7 +1,8 @@
 # %%
+import importlib
+
 import torch
 import torchvision.models
-import importlib
 
 importlib.reload(torchvision)
 torch.__version__
@@ -13,38 +14,34 @@ torch.__version__
 #!git clone https://github.com/lukemelas/EfficientNet-PyTorch
 
 # %%
-from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
+from torch import nn
+
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
-from lib.networks.SegNext import SegNext
-from lib.networks.eca import eca_resnet50
-
 
 # %%
-import pytorch_lightning as pl
-import torchvision.models as models
-from torch import nn
-from torch.nn import functional as F
-from torch.utils.data.dataloader import DataLoader
+from lib.networks.SegNext import SegNextU
+
 from .classification import ClassificationModule
 
 
 # from efficientnet_pytorch import EfficientNet
 # model = EfficientNet.from_pretrained('efficientnet-b0')
 class MyLightningModule(ClassificationModule):
-    def __init__(self):
+    def __init__(self, params, num_classes=18):
         super().__init__()
         self.conv = nn.Conv2d(
             in_channels=19, out_channels=3, kernel_size=3, padding=1
         ).cuda()
+        self.hparams.update(params)
         self.init_conv = nn.Conv2d(
             in_channels=1, out_channels=3, kernel_size=1, padding=0
         ).cuda()
-        self.fix_padding_conv = nn.Conv2d(
-            in_channels=18, out_channels=18, kernel_size=3, padding="valid"
-        ).cuda()
-        self.net = SegNext()
-        # self.classify_net = eca_resnet50(num_classes=7)  # (num_classes = 7)
+        # self.fix_padding_conv = nn.Conv2d(
+        #    in_channels=18, out_channels=18, kernel_size=3, padding="valid"
+        # ).cuda()
+        self.net = SegNextU(params, num_classes=num_classes)  # (num_classes = 18
+        # self.classify_net = eca_resnet50(num_classes=7)#(num_classes = 7)
         self.joint_loss = JointsMSELoss(use_target_weight=True)
         self.classification_loss = nn.CrossEntropyLoss()  # label_smoothing=0.001)
         # self.dense = nn.Linear(1000,7)#input_size[0]*input_size[1]
@@ -105,7 +102,7 @@ class MyLightningModule(ClassificationModule):
         # target = target[:,0]#,:]
 
         regression_loss = self.joint_loss(regress, target, target_weight) * 1000
-        class_target = meta["posture"]
+        # class_target = meta["posture"]
         # classification_loss = self.classification_loss(classify,class_target)#, y.argmax(dim=1)
         loss = regression_loss  # + 0*classification_loss
         # class_acc = (classify.argmax(dim=-1) == class_target).float().mean()

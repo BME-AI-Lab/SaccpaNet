@@ -21,3 +21,6 @@ _old_*/
 docs/build
 docs/source/api/
 docs/source/experiments/
+runs/
+retired_runs/
+set_env.bat

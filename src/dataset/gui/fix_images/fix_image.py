@@ -1,8 +1,8 @@
 import cv2
-from generate_image import RGBImageHandler, DepthImageHandler
+from .generate_image import RGBImageHandler, DepthImageHandler
 import numpy as np
 import tqdm
-from get_image_list import get_image_list
+from .get_image_list import get_image_list
 
 current_image_index = 0
 current_joint = 0
