@@ -1,5 +1,5 @@
 # model settings
-from sampler import generate_regnet_full
+from lib.modules.core.sampler import generate_regnet_full
 
 sample_params = {
     "REGNET.DEPTH": 28,

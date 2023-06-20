@@ -47,4 +47,3 @@ def compare_and_replace(x, y):
 # type_y = replace(y["state_dict"])
 merged = compare_and_replace(y["state_dict"], x)
 torch.save(merged, "merged_model.pth")
-1 / 0
