@@ -5,7 +5,8 @@ class DataFactory:
     @classmethod
     def get_row_by_image_id(id):
         pass
-    def get_image
+    def get_image():
+        pass
 
 class NotModifiableError(Exception):
     """Raise for attempt to modify a record during training"""
