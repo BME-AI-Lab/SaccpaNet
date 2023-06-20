@@ -1,4 +1,4 @@
-from common import SQL_indexer
+from .common import SQL_indexer
 import pickle
 import cv2
 import uuid

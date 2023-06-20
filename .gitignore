@@ -18,3 +18,6 @@ confusion matrix.txt
 *.txt
 "wrong cases"
 _old_*/
+docs/build
+docs/source/api/
+docs/source/experiments/

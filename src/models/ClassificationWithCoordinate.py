@@ -17,7 +17,7 @@ from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
 from lib.networks.SegNext import SegNext
-from lib.networks.eca import saccpa_resnet50
+from lib.networks.SaccpaRes import saccpa_resnet50
 
 
 # %%
