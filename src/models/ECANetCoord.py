@@ -12,7 +12,7 @@ from lib.networks.eca import eca_resnet50
 from torch import nn
 from .classification import ClassificationModule
 
-from lib.modules.SpatialSoftArgmax2d import SpatialSoftArgmax2d
+from lib.modules.core.SpatialSoftArgmax2d import SpatialSoftArgmax2d
 
 
 class MyLightningModule(ClassificationModule):

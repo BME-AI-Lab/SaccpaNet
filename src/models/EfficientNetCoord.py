@@ -34,7 +34,7 @@ from .classification import ClassificationModule
 import torchvision.models as models
 
 
-from lib.modules.SpatialSoftArgmax2d import SpatialSoftArgmax2d
+from lib.modules.core.SpatialSoftArgmax2d import SpatialSoftArgmax2d
 
 
 class MyLightningModule(ClassificationModule):

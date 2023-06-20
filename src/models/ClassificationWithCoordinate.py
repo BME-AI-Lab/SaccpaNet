@@ -23,7 +23,7 @@ from .classification import ClassificationModule
 
 # from efficientnet_pytorch import EfficientNet
 # model = EfficientNet.from_pretrained('efficientnet-b0')
-from lib.modules.SpatialSoftArgmax2d import SpatialSoftArgmax2d
+from lib.modules.core.SpatialSoftArgmax2d import SpatialSoftArgmax2d
 
 
 class MyLightningModule(ClassificationModule):
