@@ -4,7 +4,7 @@ import torchvision.models
 import importlib
 
 from lib.procedures import create_mode_coordinate_classification
-from lib.procedures import create_dataloader_coordinate_evaluation
+from lib.procedures import create_validation_dataloader
 from lib.procedures import inference_model_classification_coordinate
 from lib.procedures import evaluate_classification_model
 
@@ -31,9 +31,7 @@ if True:
     VALIDATION = True
     # assert not(MIX_TRAIN == False and NO_QUILT_TRAIN=True)
 
-    test_dataloader = create_dataloader_coordinate_evaluation(
-        BATCH_SIZE, WITH_QUILT, VALIDATION
-    )
+    test_dataloader = create_validation_dataloader(BATCH_SIZE, WITH_QUILT, VALIDATION)
     ALL_CONDITIONS_STRING = (
         f"TrainQuilt{NO_QUILT_TRAIN}_MixTrain{MIX_TRAIN}_TestWithQuilt{WITH_QUILT}"
     )

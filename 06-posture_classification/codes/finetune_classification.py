@@ -24,7 +24,7 @@ from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 from torch.utils.data.dataloader import DataLoader
 
 
-from lib.procedures import create_dataloader
+from lib.procedures import create_dataloaders
 
 
 if __name__ == "__main__":
@@ -38,9 +38,7 @@ if __name__ == "__main__":
     if True:
         # MODEL_NAME = "modelD"
 
-        train_dataloader, test_dataloader = create_dataloader(
-            CLASSIFICATION_MODELS, BATCH_SIZE
-        )
+        train_dataloader, test_dataloader = create_dataloaders(BATCH_SIZE)
 
         model = create_model_classification_with_keypoint(
             KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path

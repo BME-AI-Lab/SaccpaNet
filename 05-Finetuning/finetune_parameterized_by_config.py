@@ -5,7 +5,7 @@ import torchvision.models
 import importlib
 from configs.random_searched_params import params
 from lib.procedures import train_and_evaluate_finetune_parameterized_by_config
-from lib.procedures import create_dataloader_finetune_parameterized_by_config
+from lib.procedures import create_dataloaders
 
 importlib.reload(torchvision)
 torch.__version__
@@ -33,11 +33,11 @@ if __name__ == "__main__":
     seed = 6
     model = importlib.import_module(f"models.{MODEL_NAME}")
     BATCH_SIZE = 8
+    default_root_dir = f"./log/{MODEL_NAME}"
     (
-        default_root_dir,
         train_dataloader,
         test_dataloader,
-    ) = create_dataloader_finetune_parameterized_by_config(MODEL_NAME, BATCH_SIZE)
+    ) = create_dataloaders(MODEL_NAME, BATCH_SIZE)
     PARAM_NAME = os.path.basename(os.getcwd())
     default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
     model = importlib.import_module(f"models.{MODEL_NAME}")

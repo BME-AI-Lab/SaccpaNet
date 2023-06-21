@@ -4,14 +4,19 @@ from glob import glob
 from itertools import cycle
 import os
 from os.path import dirname
-from 06
-from torch import nn-Posture_Classification.codes.multiple_network_inference_classifcation import RESULT_DIR
 import matplotlib.pyplot as plt
 import numpy as np
-from 06-Posture_Classification.codes.multiple_network_inference_classifcation import RESULT_DIR
 import pytorch_lightning as pl
 import importlib
-from sklearn.metrics import auc, classification_report, confusion_matrix, f1_score, roc_auc_score, roc_curve, top_k_accuracy_score
+from sklearn.metrics import (
+    auc,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    roc_auc_score,
+    roc_curve,
+    top_k_accuracy_score,
+)
 
 import torch
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -23,8 +28,27 @@ from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 from torch.utils.data.dataloader import DataLoader
 
 
-def create_dataloader(MODEL_NAME, BATCH_SIZE):
+def create_dataloaders(BATCH_SIZE):
+    train_dataloader = create_train_dataloader(BATCH_SIZE)
+    test_dataloader = create_test_dataloader(BATCH_SIZE)
+    return train_dataloader, test_dataloader
+
+
+def create_test_dataloader(BATCH_SIZE):
     test_dataset = SQLJointsDataset(train=False)
+    test_dataloader = DataLoader(
+        test_dataset,
+        batch_size=BATCH_SIZE,
+        shuffle=False,
+        num_workers=2,
+        pin_memory=True,
+        persistent_workers=2,
+    )
+
+    return test_dataloader
+
+
+def create_train_dataloader(BATCH_SIZE):
     train_dataset = SQLJointsDataset(train=True)
     train_dataloader = DataLoader(
         train_dataset,
@@ -34,16 +58,26 @@ def create_dataloader(MODEL_NAME, BATCH_SIZE):
         pin_memory=True,
         persistent_workers=2,
     )
-    test_dataloader = DataLoader(
-        test_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-        num_workers=2,
-        pin_memory=True,
-        persistent_workers=2,
+
+    return train_dataloader
+
+
+def create_validation_dataloader(BATCH_SIZE, WITH_QUILT, VALIDATION):
+    if WITH_QUILT:
+        val_dataset = SQLJointsDataset(
+            train=False, mixed=False, all_quilt=True, validation=VALIDATION
+        )
+        quilt_conditions = "all_quilts"
+    else:
+        val_dataset = SQLJointsDataset(
+            train=False, mixed=False, all_quilt=False, validation=VALIDATION
+        )
+        quilt_conditions = "no_quilts"
+    val_dataloader = DataLoader(
+        val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0
     )
 
-    return train_dataloader, test_dataloader
+    return val_dataloader
 
 
 def load_train_eval_sample(
@@ -207,50 +241,11 @@ def train_and_evaluate_finetune_parameterized_by_config(
     torch.cuda.empty_cache()
 
 
-def create_dataloader_finetune_parameterized_by_config(MODEL_NAME, BATCH_SIZE):
-    test_dataset = SQLJointsDataset(train=False)
-
-    WITH_FILTERED = True
-    if MODEL_NAME == "model0":
-        # test_dataset = SQLJointsDataset(train=False)
-        SQLJointsDataset.TABLE_NAME = "openpose_annotation_old_data"
-        train_dataset = SQLJointsDataset(train=True)
-    elif WITH_FILTERED == True:
-        SQLJointsDataset.TABLE_NAME = "openpose_annotation_03_18_with_quilt_filtered"
-        train_dataset = SQLJointsDataset(train=True)
-    else:
-        train_dataset = SQLJointsDataset(train=True)
-    WITHOUT_MIX = False
-    # for WITHOUT_MIX in [False]: #temp script
-    if WITHOUT_MIX:
-        train_dataset.probability = 0
-        default_root_dir = f"./log/without_mix/{MODEL_NAME}"
-    else:
-        default_root_dir = f"./log/{MODEL_NAME}"
-        # sampler specific
-    train_dataloader = DataLoader(
-        train_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-        num_workers=1,
-        pin_memory=True,
-        persistent_workers=4,
-    )
-    test_dataloader = DataLoader(
-        test_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-        num_workers=1,
-        pin_memory=True,
-        persistent_workers=4,
-    )
-
-    return default_root_dir, train_dataloader, test_dataloader
-
-
 # ["modelA","modelB","modelC"]
 # MODELS = [i+"_co" for i in MODELS]
-def create_mode_coordinate_classification(KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path, params, default_root_dir):
+def create_mode_coordinate_classification(
+    KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path, params, default_root_dir
+):
     kpt_model = importlib.import_module(f"models.{KEYPOINT_MODELS}")
     kpt_model = kpt_model.MyLightningModule(params)  # locals()[f'{MODEL_NAME}']()
     kpt_model = kpt_model.load_from_checkpoint(ckpt_path, params=params)
@@ -267,7 +262,7 @@ def create_mode_coordinate_classification(KEYPOINT_MODELS, CLASSIFICATION_MODELS
     RESULT_DIR = dirname(model_checkpoint_file)
     model.cuda()
     model.eval()
-    return model,RESULT_DIR
+    return model, RESULT_DIR
 
 
 def plot_auc(ly, ly_weight):
@@ -342,24 +337,6 @@ def write(filename, string):
         f.write(string)
 
 
-def create_dataloader_coordinate_evaluation(BATCH_SIZE, WITH_QUILT, VALIDATION):
-    if WITH_QUILT:
-        test_dataset = SQLJointsDataset(
-            train=False, mixed=False, all_quilt=True, validation=VALIDATION
-        )
-        quilt_conditions = "all_quilts"
-    else:
-        test_dataset = SQLJointsDataset(
-            train=False, mixed=False, all_quilt=False, validation=VALIDATION
-        )
-        quilt_conditions = "no_quilts"
-    test_dataloader = DataLoader(
-        test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0
-    )
-
-    return test_dataloader
-
-
 def inference_model_classification_coordinate(test_dataloader, model):
     softmax = nn.Softmax(dim=1)
     ly, ly_hat = [], []
@@ -396,10 +373,12 @@ def inference_model_classification_coordinate(test_dataloader, model):
     image_ids = np.concatenate(image_ids)
     ly_weight = np.concatenate(ly_weight)
     input_storage = np.concatenate(input_storage)
-    return ly,ly_hat,image_ids,ly_weight,input_storage
+    return ly, ly_hat, image_ids, ly_weight, input_storage
 
 
-def evaluate_classification_model(ALL_CONDITIONS_STRING, RESULT_DIR, ly, ly_hat, image_ids, ly_weight, input_storage):
+def evaluate_classification_model(
+    ALL_CONDITIONS_STRING, RESULT_DIR, ly, ly_hat, image_ids, ly_weight, input_storage
+):
     posture_map = [
         "supine",
         "right log",
@@ -440,8 +419,3 @@ def evaluate_classification_model(ALL_CONDITIONS_STRING, RESULT_DIR, ly, ly_hat,
         plt.clf()
     results.sort()
     write("wrong cases.txt", "\n".join(results))
-
-
-
-
-

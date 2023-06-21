@@ -3,7 +3,7 @@ import torch
 import torchvision.models
 import importlib
 
-from lib.procedures import create_dataloader, load_train_eval_sample
+from lib.procedures import create_dataloaders, load_train_eval_sample
 from lib.procedures import write_log
 from lib.procedures import update_log
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     BATCH_SIZE = 8
     TOTAL_EPOCH = 300
     default_root_dir = f"./log/{MODEL_NAME}"
-    train_dataloader, test_dataloader = create_dataloader(MODEL_NAME, BATCH_SIZE)
+    train_dataloader, test_dataloader = create_dataloaders(MODEL_NAME, BATCH_SIZE)
     for PARAM_NAME, params in SAMPLES.items():
         # MODEL_NAME = "modelD"
         default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
