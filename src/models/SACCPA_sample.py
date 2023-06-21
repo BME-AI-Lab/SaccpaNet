@@ -1,30 +1,8 @@
-# %%
-import importlib
-
-import torch
-import torchvision.models
-
 from models.regression import RegressionModule
-
-importlib.reload(torchvision)
-torch.__version__
-
-# %%
-#!pip uninstall efficientnet_pytorch -y
-
-# %%
-#!git clone https://github.com/lukemelas/EfficientNet-PyTorch
-
-# %%
 from torch import nn
-
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
-
-# %%
 from lib.networks.SegNext import SegNextU
-
-s
 
 
 class MyLightningModule(RegressionModule):

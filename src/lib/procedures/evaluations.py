@@ -34,7 +34,7 @@ def update_log(PARAM_NAME, params, x):
     params["key"] = PARAM_NAME
 
 
-def plot_auc(ly, ly_weight):
+def plot_auc(RESULT_DIR, ly, ly_weight):
     b = np.zeros((ly.size, ly.max() + 1))
     b[np.arange(ly.size), ly] = 1
     ly = b
@@ -102,11 +102,11 @@ def plot_auc(ly, ly_weight):
 def write(filename, string):
     if not isinstance(string, str):
         string = str(string)
-    with open(f"{RESULT_DIR}/{filename}", "w") as f:
+    with open(filename, "w") as f:
         f.write(string)
 
 
-def evaluate_classification_model(
+def evaluate_cls(
     ALL_CONDITIONS_STRING, RESULT_DIR, ly, ly_hat, image_ids, ly_weight, input_storage
 ):
     posture_map = [
@@ -119,17 +119,17 @@ def evaluate_classification_model(
         "prone left",
     ]
     cfm = confusion_matrix(ly, ly_hat)
-    write(f"{ALL_CONDITIONS_STRING}_confusion matrix.txt", cfm)
+    write(f"{RESULT_DIR}/{ALL_CONDITIONS_STRING}_confusion matrix.txt", cfm)
     cr = classification_report(ly, ly_hat, target_names=posture_map, digits=3)
-    write(f"{ALL_CONDITIONS_STRING}_classification report.txt", cr)
+    write(f"{RESULT_DIR}/{ALL_CONDITIONS_STRING}_classification report.txt", cr)
     f1 = f1_score(ly, ly_hat, average="macro")
     # print(ly_weight.shape,ly)
     auc_score = roc_auc_score(ly, ly_weight, multi_class="ovo", average="macro")
     top2 = top_k_accuracy_score(ly, ly_weight)
     result_string = f"f1:{f1}, auc:{auc_score}, top2:{top2}"
-    write(f"{ALL_CONDITIONS_STRING}_aux.txt", result_string)
+    write(f"{RESULT_DIR}/{ALL_CONDITIONS_STRING}_aux.txt", result_string)
     print(result_string)
-    plot_auc(ly, ly_weight)
+    plot_auc(RESULT_DIR, ly, ly_weight)
     results = []
     filter = ly != ly_hat
     dataset_positions = np.array(range(len(ly)))[filter]
@@ -148,7 +148,7 @@ def evaluate_classification_model(
         plt.savefig(f"{RESULT_DIR}/{id}.png", bbox_inches="tight")
         plt.clf()
     results.sort()
-    write("wrong cases.txt", "\n".join(results))
+    write(f"{RESULT_DIR}/wrong cases.txt", "\n".join(results))
 
 
 def inference_model_classification_coordinate(test_dataloader, model):
@@ -181,7 +181,6 @@ def inference_model_classification_coordinate(test_dataloader, model):
         image_ids.append(meta["image"].cpu().numpy())
         ly_weight.append(softmax(classify).detach().cpu().numpy())
         input_storage.append(input.cpu().numpy())
-    # %%
 
     ly, ly_hat = np.concatenate(ly), np.concatenate(ly_hat)
     image_ids = np.concatenate(image_ids)

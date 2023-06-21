@@ -1,35 +1,14 @@
 # %%
 import os
 import torch
-import torchvision.models
 import importlib
 from configs.random_searched_params import params
-from lib.procedures import train_and_evaluate_finetune_parameterized_by_config
 from lib.procedures import create_dataloaders
-from lib.procedures.evaluations import update_log, write_log
-from lib.procedures.procedures import train_and_evluate
-
-importlib.reload(torchvision)
-torch.__version__
-# from config import *
-
-# grid searched
-
-# %%
-#!pip uninstall efficientnet_pytorch -y
-
-# %%
-#!git clone https://github.com/lukemelas/EfficientNet-PyTorch
-
-# %%
-
-# %%
-
-# import torchvision.models as models
+from lib.procedures import update_log, write_log
+from lib.procedures import train_and_evluate
+import gc
 
 if __name__ == "__main__":
-    import importlib
-
     MODEL_NAME = "segnext_sample"
     PRETRAIN_MODEL = "merged_model.pth"
     seed = 6

@@ -32,7 +32,6 @@ filtered_db.to_sql(
     if_exists="replace",
 )
 
-# %%
 # save the image data to a separate table
 image_db = pd.read_sql_query(
     """

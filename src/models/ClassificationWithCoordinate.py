@@ -1,11 +1,5 @@
-# %%
 import torch
-import torchvision.models
-import importlib
 from .hyperparameters import lr, l2
-
-importlib.reload(torchvision)
-torch.__version__
 from lib.modules.core.loss import JointsMSELoss
 import torchvision.models as models
 from torch import nn

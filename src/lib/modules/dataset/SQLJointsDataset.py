@@ -1,11 +1,7 @@
-# %%
 from lib.modules.dataset.JointsDataset import JointsDataset
-
-from lib.modules.dataset.common import SQL_indexer
 import pandas as pd
 import numpy as np
 import logging
-import torch
 
 logger = logging.getLogger(__name__)
 from random import random, seed, randrange
@@ -228,7 +224,6 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     # test print joint
-    # %%
     a, b, c, d = next(ds_iter)
     plt.imshow(a)
     plt.show()
@@ -237,4 +232,3 @@ if __name__ == "__main__":
         zeros = zeros + b[i].numpy()
         plt.imshow(b[i])
         plt.show()
-    # %%
