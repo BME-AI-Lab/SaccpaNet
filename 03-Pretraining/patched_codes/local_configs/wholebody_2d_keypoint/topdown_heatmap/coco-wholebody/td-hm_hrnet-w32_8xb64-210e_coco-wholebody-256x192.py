@@ -1,14 +1,8 @@
 # model settings
 from sampler import generate_regnet_full
 
-sample_params = {
-    "REGNET.DEPTH": 28,
-    "REGNET.W0": 104,
-    "REGNET.WA": 35.7,
-    "REGNET.WM": 2,
-    "REGNET.GROUP_W": 40,
-    "REGNET.BOT_MUL": 1,
-}
+from configs.manually_searched_params import params as sample_params
+
 ws, ds, ss, bs, gs = generate_regnet_full(sample_params)
 norm_cfg = dict(type="BN", requires_grad=True)
 ham_norm_cfg = dict(type="GN", num_groups=32, requires_grad=True)

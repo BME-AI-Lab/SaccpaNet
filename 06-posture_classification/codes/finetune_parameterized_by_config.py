@@ -1,53 +1,24 @@
 # %%
 import os
-from numpy import ModuleDeprecationWarning
 import torch
 import torchvision.models
 import importlib
 import csv
+from configs.manually_searched_params import params
 
 importlib.reload(torchvision)
 torch.__version__
 # from config import *
 
-# grid searched
-params = {
-    "REGNET.DEPTH": 28,
-    "REGNET.W0": 104,
-    "REGNET.WA": 35.7,
-    "REGNET.WM": 2,
-    "REGNET.GROUP_W": 40,
-    "REGNET.BOT_MUL": 1,
-}
-# random serached
-# params = {
-#     "REGNET.DEPTH": 28,
-#     "REGNET.W0": 32,
-#     "REGNET.WA": 8.7,
-#     "REGNET.WM": 2.245,
-#     "REGNET.GROUP_W": 64,
-#     "REGNET.BOT_MUL": 1,
-# }
-# %%
-#!pip uninstall efficientnet_pytorch -y
-
-# %%
-#!git clone https://github.com/lukemelas/EfficientNet-PyTorch
 
 # %%
 from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
-from lib.modules.core.function import accuracy
-from lib.modules.core.loss import JointsMSELoss
-from lib.modules.modules import Network
-from lib.modules.core.sampler import sample_cfgs, generate_regnet_full
 
 # %%
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 # import torchvision.models as models
-from torch import nn
-from torch.nn import functional as F
 from torch.utils.data.dataloader import DataLoader
 import gc
 
@@ -170,8 +141,6 @@ if __name__ == "__main__":
             if write_header:
                 writer.writeheader()
             writer.writerow(params)
-            # f.write(str(params))
-            # f.write("\n\n\n")
 
         del trainer
         del model

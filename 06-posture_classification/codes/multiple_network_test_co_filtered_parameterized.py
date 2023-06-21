@@ -1,6 +1,5 @@
 # %%
 import os
-from numpy import ModuleDeprecationWarning
 import torch
 import torchvision.models
 import importlib
@@ -17,17 +16,12 @@ torch.__version__
 
 # %%
 from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
-from lib.modules.core.function import accuracy
-from lib.modules.core.loss import JointsMSELoss
-from lib.modules.modules import Network
-from lib.modules.core.sampler import sample_cfgs, generate_regnet_full
+from lib.modules.core.sampler import sample_cfgs
 
 # %%
 import pytorch_lightning as pl
 
 # import torchvision.models as models
-from torch import nn
-from torch.nn import functional as F
 from torch.utils.data.dataloader import DataLoader
 
 # from efficientnet_pytorch import EfficientNet
