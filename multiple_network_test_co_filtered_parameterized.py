@@ -2,20 +2,9 @@
 import os
 from numpy import ModuleDeprecationWarning
 import torch
-import torchvision.models
 import importlib
 import csv
 
-importlib.reload(torchvision)
-torch.__version__
-
-# %%
-#!pip uninstall efficientnet_pytorch -y
-
-# %%
-#!git clone https://github.com/lukemelas/EfficientNet-PyTorch
-
-# %%
 from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
@@ -32,16 +21,8 @@ from torch.nn import functional as F
 from torch.utils.data.dataloader import DataLoader
 import gc
 from config import *
+from procedure import 
 
-# from efficientnet_pytorch import EfficientNet
-# model = EfficientNet.from_pretrained('efficientnet-b0')
-# from models.modelA import MyLightningModule as modelA
-
-# from models.modelB import MyLightningModule as modelB
-# from models.modelD import MyLightningModule as modelD
-# from models.modelH import MyLightningModule as modelH
-
-# from models.modelE import MyLightningModule as modelE
 if __name__ == "__main__":
     import importlib
 
