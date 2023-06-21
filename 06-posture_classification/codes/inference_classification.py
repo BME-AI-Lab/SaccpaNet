@@ -7,9 +7,9 @@ from lib.procedures import (
 from sklearn.metrics import *
 from configs.manually_searched_params import params
 
-KEYPOINT_MODELS = "segnext_sample"
+KEYPOINT_MODELS = "saccpa_sample"
 CLASSIFICATION_MODELS = "ScappaClass"
-ckpt_path = "log\\segnext_sample\\15-fine_tuning\\lightning_logs\\version_6\\checkpoints\\best-epoch=069-val_loss=0.344.ckpt"
+ckpt_path = "log\\saccpa_sample\\15-fine_tuning\\lightning_logs\\version_6\\checkpoints\\best-epoch=069-val_loss=0.344.ckpt"
 
 BATCH_SIZE = 1
 default_root_dir = f"./log/{CLASSIFICATION_MODELS}"

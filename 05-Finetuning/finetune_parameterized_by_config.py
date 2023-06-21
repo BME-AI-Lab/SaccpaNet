@@ -5,11 +5,11 @@ import importlib
 from configs.random_searched_params import params
 from lib.procedures import create_dataloaders
 from lib.procedures import update_log, write_log
-from lib.procedures import train_and_evluate
+from lib.procedures import train_and_evaluate
 import gc
 
 if __name__ == "__main__":
-    MODEL_NAME = "segnext_sample"
+    MODEL_NAME = "saccpa_sample"
     PRETRAIN_MODEL = "merged_model.pth"
     seed = 6
     model = importlib.import_module(f"models.{MODEL_NAME}")
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     (
         train_dataloader,
         test_dataloader,
-    ) = create_dataloaders(MODEL_NAME, BATCH_SIZE)
+    ) = create_dataloaders(BATCH_SIZE)
     PARAM_NAME = os.path.basename(os.getcwd())
     default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
     model = importlib.import_module(f"models.{MODEL_NAME}")
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     state_dict = torch.load(PRETRAIN_MODEL)
     model.load_state_dict(state_dict)
     epoch = 300
-    model, trainer, x = train_and_evluate(
+    model, trainer, x = train_and_evaluate(
         MODEL_NAME,
         model,
         default_root_dir,

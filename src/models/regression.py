@@ -118,6 +118,9 @@ class RegressionModule(pl.LightningModule):
         return {"test_loss": loss, "test_joint_acc": acc}
 
     def configure_optimizers(self):
-        lr = lr  # 0.02#0.00002c
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=l2)
+        self.lr = lr
+        self.l2 = l2
+        self.optimizer = torch.optim.Adam(
+            self.parameters(), lr=self.lr, weight_decay=self.l2
+        )
         return [self.optimizer]  # , [sched]

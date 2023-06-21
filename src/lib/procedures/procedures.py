@@ -60,7 +60,7 @@ def create_load_cls_kpt(
     return model, RESULT_DIR
 
 
-def train_and_evluate(
+def train_and_evaluate(
     MODEL_NAME,
     model,
     default_root_dir,
