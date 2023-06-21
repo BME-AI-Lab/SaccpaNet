@@ -33,7 +33,7 @@ if __name__ == "__main__":
     KEYPOINT_MODELS = "segnext_sample"
     CLASSIFICATION_MODELS = "ScappaClass"
     ckpt_path = "log\\segnext_sample\\15-fine_tuning\\lightning_logs\\version_6\\checkpoints\\best-epoch=069-val_loss=0.344.ckpt"
-    BATCH_SIZE = 32
+    BATCH_SIZE = 16
     default_root_dir = f"./log/{CLASSIFICATION_MODELS}"
     if True:
         # MODEL_NAME = "modelD"

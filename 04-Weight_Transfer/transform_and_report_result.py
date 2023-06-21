@@ -1,7 +1,6 @@
+import argparse
+import pathlib
 import torch
-
-x = torch.load("origin_model.pth")
-y = torch.load("best_coco-wholebody_AP_epoch_210.pth")
 
 
 def replace(d):
@@ -45,5 +44,18 @@ def compare_and_replace(x, y):
 
 # type_x = replace(x)
 # type_y = replace(y["state_dict"])
-merged = compare_and_replace(y["state_dict"], x)
-torch.save(merged, "merged_model.pth")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Transfer Weights from MMPose models to plain Pytorch models"
+    )
+    parser.add_argument("pretrain", type=pathlib.Path)
+    parser.add_argument("target", type=pathlib.Path)
+    parser.add_argument("output", type=pathlib.Path, default="merged_model.pth")
+    args = parser.parse_args()
+    pretrain = args.pretrain
+    target = args.target
+    save_path = args.output
+    x = torch.load(target)
+    y = torch.load(pretrain)
+    merged = compare_and_replace(y["state_dict"], x)
+    torch.save(merged, save_path)
