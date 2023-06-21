@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 from torch import nn
 import torch
-from .config import *
+from .hyperparameters import *
 
 
 # from efficientnet_pytorch import EfficientNet
