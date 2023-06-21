@@ -16,7 +16,7 @@ torch.__version__
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
 from lib.modules._old_models.modules import Network
-from .config import *
+from .hyperparameters import *
 
 # %%
 import pytorch_lightning as pl
