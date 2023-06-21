@@ -19,7 +19,7 @@ from lib.modules.core.loss import JointsMSELoss
 # %%
 import torchvision.models as models
 from torch import nn
-from .classification import ClassificationModule
+from .base_module import ClassificationModule
 
 # from efficientnet_pytorch import EfficientNet
 # model = EfficientNet.from_pretrained('efficientnet-b0')

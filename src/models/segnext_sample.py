@@ -22,7 +22,7 @@ from lib.modules.core.loss import JointsMSELoss
 # %%
 from lib.networks.SegNext import SegNextU
 
-from .classification import ClassificationModule
+from .base_module import ClassificationModule
 
 
 # from efficientnet_pytorch import EfficientNet

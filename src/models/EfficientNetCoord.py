@@ -30,7 +30,7 @@ from torch import nn
 
 # from torch.nn import functional as F
 # from torch.utils.data.dataloader import DataLoader
-from .classification import ClassificationModule
+from .base_module import ClassificationModule
 import torchvision.models as models
 
 

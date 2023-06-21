@@ -19,7 +19,7 @@ from lib.networks.SaccpaRes import saccpa_resnet50
 
 # %%
 from torch import nn
-from .classification import ClassificationModule
+from .base_module import ClassificationModule
 
 # from efficientnet_pytorch import EfficientNet
 # model = EfficientNet.from_pretrained('efficientnet-b0')

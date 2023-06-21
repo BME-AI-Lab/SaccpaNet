@@ -65,7 +65,6 @@ if __name__ == "__main__":
 
     MODEL_NAME = "segnext_sample"
     PRETRAIN_MODEL = "merged_model.pth"
-    seed = 6
     model = importlib.import_module(f"models.{MODEL_NAME}")
     BATCH_SIZE = 8
     if True:  # dataset
