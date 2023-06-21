@@ -3,7 +3,7 @@ import torch
 import torchvision.models
 import importlib
 
-from lib.procedures import create_model_classification_with_keypoint
+from lib.procedures import create_classification_with_keypoint_model
 from lib.procedures import train_for_model_finetune_classification
 
 importlib.reload(torchvision)
@@ -22,9 +22,9 @@ from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 
 # import torchvision.models as models
 from torch.utils.data.dataloader import DataLoader
+from configs.manually_searched_params import params
 
-
-from lib.procedures import create_dataloaders
+from lib.procedures import *
 
 
 if __name__ == "__main__":
@@ -40,13 +40,18 @@ if __name__ == "__main__":
 
         train_dataloader, test_dataloader = create_dataloaders(BATCH_SIZE)
 
-        model = create_model_classification_with_keypoint(
+        model = create_classification_with_keypoint_model(
             KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path
         )
-
-        print(f"Now training for {CLASSIFICATION_MODELS}+{KEYPOINT_MODELS}")
-        trainer = train_for_model_finetune_classification(
-            default_root_dir, train_dataloader, test_dataloader, model
+        epoch = 500
+        MODEL_NAME = f"{CLASSIFICATION_MODELS}+{KEYPOINT_MODELS}"
+        model, trainer, x = load_train_eval_sample(
+            MODEL_NAME,
+            model,
+            default_root_dir,
+            train_dataloader,
+            test_dataloader,
+            epoch=epoch,
         )
 
         # %%

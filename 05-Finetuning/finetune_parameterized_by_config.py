@@ -6,6 +6,8 @@ import importlib
 from configs.random_searched_params import params
 from lib.procedures import train_and_evaluate_finetune_parameterized_by_config
 from lib.procedures import create_dataloaders
+from lib.procedures.evaluations import update_log, write_log
+from lib.procedures.procedures import load_train_eval_sample
 
 importlib.reload(torchvision)
 torch.__version__
@@ -42,13 +44,23 @@ if __name__ == "__main__":
     default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
     model = importlib.import_module(f"models.{MODEL_NAME}")
     model = model.MyLightningModule(params, num_classes=18)
-
-    train_and_evaluate_finetune_parameterized_by_config(
+    state_dict = torch.load(PRETRAIN_MODEL)
+    model.load_state_dict(state_dict)
+    epoch = 300
+    model, trainer, x = load_train_eval_sample(
         MODEL_NAME,
-        PRETRAIN_MODEL,
         model,
         default_root_dir,
         train_dataloader,
         test_dataloader,
-        PARAM_NAME,
+        epoch,
     )
+    update_log(PARAM_NAME, params, x)
+
+    log_file = "log.csv"
+    write_log(params, log_file)
+
+    del trainer
+    del model
+    gc.collect()
+    torch.cuda.empty_cache()

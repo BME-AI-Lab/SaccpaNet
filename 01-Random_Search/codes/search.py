@@ -1,14 +1,12 @@
 # %%
 import torch
-import torchvision.models
-import importlib
+from lib.procedures.evaluations import update_log, write_log
 
-from lib.procedures import create_dataloaders, load_train_eval_sample
-from lib.procedures import write_log
-from lib.procedures import update_log
-
-importlib.reload(torchvision)
-torch.__version__
+from lib.procedures.procedures import (
+    create_dataloaders,
+    create_kpt_model,
+    load_train_eval_sample,
+)
 
 # %%
 #!pip uninstall efficientnet_pytorch -y
@@ -41,19 +39,19 @@ if __name__ == "__main__":
     for PARAM_NAME, params in SAMPLES.items():
         # MODEL_NAME = "modelD"
         default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
-
-        model, trainer, x = load_train_eval_sample(
+        model = create_kpt_model(MODEL_NAME, params)
+        model, trainer, result = load_train_eval_sample(
             MODEL_NAME,
+            model,
             default_root_dir,
             train_dataloader,
             test_dataloader,
-            params,
             epochs=TOTAL_EPOCH,
         )
 
         # %%
 
-        update_log(PARAM_NAME, params, x)
+        update_log(PARAM_NAME, params, result)
         write_log(params, log_file=log_file)
 
         del trainer

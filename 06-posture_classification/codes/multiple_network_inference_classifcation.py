@@ -5,8 +5,8 @@ import importlib
 
 from lib.procedures import create_mode_coordinate_classification
 from lib.procedures import create_validation_dataloader
-from lib.procedures import inference_model_classification_coordinate
-from lib.procedures import evaluate_classification_model
+from lib.procedures.evaluations import inference_model_classification_coordinate
+from lib.procedures.evaluations import evaluate_classification_model
 
 importlib.reload(torchvision)
 torch.__version__
