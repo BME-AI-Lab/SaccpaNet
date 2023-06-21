@@ -4,8 +4,8 @@ from lib.procedures.evaluations import update_log, write_log
 
 from lib.procedures.procedures import (
     create_dataloaders,
-    create_kpt_model,
-    load_train_eval_sample,
+    create_kpt,
+    train_and_evluate,
 )
 
 # %%
@@ -39,8 +39,8 @@ if __name__ == "__main__":
     for PARAM_NAME, params in SAMPLES.items():
         # MODEL_NAME = "modelD"
         default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
-        model = create_kpt_model(MODEL_NAME, params)
-        model, trainer, result = load_train_eval_sample(
+        model = create_kpt(MODEL_NAME, params)
+        model, trainer, result = train_and_evluate(
             MODEL_NAME,
             model,
             default_root_dir,

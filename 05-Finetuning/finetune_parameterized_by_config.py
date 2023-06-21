@@ -7,7 +7,7 @@ from configs.random_searched_params import params
 from lib.procedures import train_and_evaluate_finetune_parameterized_by_config
 from lib.procedures import create_dataloaders
 from lib.procedures.evaluations import update_log, write_log
-from lib.procedures.procedures import load_train_eval_sample
+from lib.procedures.procedures import train_and_evluate
 
 importlib.reload(torchvision)
 torch.__version__
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     state_dict = torch.load(PRETRAIN_MODEL)
     model.load_state_dict(state_dict)
     epoch = 300
-    model, trainer, x = load_train_eval_sample(
+    model, trainer, x = train_and_evluate(
         MODEL_NAME,
         model,
         default_root_dir,
