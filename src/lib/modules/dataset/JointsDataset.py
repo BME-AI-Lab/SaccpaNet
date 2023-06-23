@@ -49,10 +49,8 @@ class JointsDataset(Dataset):
 
         self.image_size = np.array((192, 256))  # (192,256) #cfg.MODEL.IMAGE_SIZE
         self.target_type = "gaussian"  # cfg.MODEL.EXTRA.TARGET_TYPE
-        self.heatmap_size = (
-            self.image_size
-        )  # np.array((48,64))#cfg.MODEL.EXTRA.HEATMAP_SIZE
-        self.sigma = 4  # 2#cfg.MODEL.EXTRA.SIGMA
+        self.heatmap_size = np.array((24, 32))
+        self.sigma = 2  # 2#cfg.MODEL.EXTRA.SIGMA
 
         self.scale_factor = 0.3
         self.flip = self.is_train
@@ -95,20 +93,11 @@ class JointsDataset(Dataset):
         filename = db_rec["filename"] if "filename" in db_rec else ""
         imgnum = db_rec["imgnum"] if "imgnum" in db_rec else ""
 
-        if self.data_format == "zip":  #: TBD: remove from  this file
-            from utils import zipreader
-
-            data_numpy = zipreader.imread(
-                image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
-            )
-        elif self.data_format == "sql":
+        if self.data_format == "sql":
             data_numpy = self._get_numpy_image(idx)
 
         else:
             assert False, "Need to define data_format"
-            data_numpy = cv2.imread(
-                image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
-            )
 
         if data_numpy is None:
             logger.error("=> fail to read {}".format(image_file))
@@ -144,8 +133,7 @@ class JointsDataset(Dataset):
             (int(self.image_size[0]), int(self.image_size[1])),
             flags=cv2.INTER_LINEAR,
         )
-        # """
-        # input = data_numpy
+        # Support for post transformation of image
         if self.transform:
             input = self.transform(input)
 
@@ -231,7 +219,8 @@ class JointsDataset(Dataset):
         heatmap_dict = self.heatmap_generator.encode(joints, joints_vis)
         heatmaps = heatmap_dict["heatmaps"]
         # add dummy z axis back
-        # n, h, w, _ = heatmaps.shape
+        # heatmaps = np.expand_dims(heatmaps, axis=0)
+        # h, w, _ = heatmaps.shape
         # heatmaps = np.concatenate([heatmaps, np.zeros((n, h, w, 1))], axis=3)
         heatmap_weights = heatmap_dict["keypoint_weights"]
         heatmap_weights = heatmap_weights.reshape((self.num_joints, 1))

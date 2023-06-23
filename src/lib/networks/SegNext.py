@@ -701,7 +701,8 @@ from torchvision.transforms.functional import resize as _resize
 
 
 def resize(level, size, mode="bilinear", align_corners=None):
-    return _resize(level, size)
+    level = _resize(level, size)
+    return level
 
 
 class LightHamHead(nn.Module):
@@ -772,11 +773,12 @@ class LightHamHead(nn.Module):
     def forward(self, inputs):
         """Forward function."""
         inputs = self._transform_inputs(inputs)
+        size = inputs[0].shape[2:]
 
         inputs = [
             resize(
                 level,
-                size=inputs[0].shape[2:],
+                size=size,
                 mode="bilinear",
                 # align_corners=self.align_corners
             )
@@ -821,7 +823,7 @@ class SegNext(nn.Module):
         x = self.head(x)
         # x= resize()
         x = F.tanh(x)  # doubt
-        x = resize(x, (256, 192))  # doubt
+        # x = resize(x, (256, 192))  # doubt
         return x
 
 
@@ -859,5 +861,5 @@ class SegNextU(nn.Module):
         x = self.head(x)
         # x= resize()
         x = F.tanh(x)  # doubt
-        x = resize(x, (256, 192))  # doubt
+        # x = resize(x, (256, 192))  # doubt
         return x
