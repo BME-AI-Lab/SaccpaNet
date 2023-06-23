@@ -25,3 +25,5 @@ runs/
 retired_runs/
 set_env.bat
 benchmark/
+*.zip
+*.7z

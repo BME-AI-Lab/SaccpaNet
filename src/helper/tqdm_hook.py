@@ -36,7 +36,7 @@ if token is not None and chat_id is not None:
             token = os.environ.get("TELEGRAM_TOKEN")
             chat_id = os.environ.get("TELEGRAM_CHAT_ID")
             super().__init__(
-                token=token, chat_id=chat_id, min_interval=10, *args, **kwargs
+                token=token, chat_id=chat_id, mininterval=10, *args, **kwargs
             )
 
         @staticmethod

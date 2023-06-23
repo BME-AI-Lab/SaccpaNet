@@ -13,7 +13,7 @@ import functools
 
 
 class SQLJointsDataset(JointsDataset):
-    DB_CONNECTION_STRING = "sqlite:///D:/Posture Coordinate Models/dataset.db"
+    DB_CONNECTION_STRING = "sqlite:///..\\dataset.db"
     TABLE_NAME = "annotations"
     TEST_TABLE_NAME = "annotations"
 

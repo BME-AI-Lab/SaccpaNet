@@ -53,7 +53,7 @@ class ResolveImage:
     def __init__(
         self,
         query_string="SELECT a.depth_array FROM depth_images as a WHERE a.`index`={}",
-        connection="sqlite:///D:\\Posture Coordinate Models\\dataset.db",
+        connection="sqlite:///..\\dataset.db",
         resize=(224, 224),
     ):
         self.image_index = SQL_indexer(query_string, connection)
