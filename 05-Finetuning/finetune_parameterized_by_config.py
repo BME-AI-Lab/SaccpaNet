@@ -2,7 +2,7 @@
 import os
 import torch
 import importlib
-from configs.random_searched_params import params
+from configs.manually_searched_params import params
 from lib.procedures import create_dataloaders
 from lib.procedures import update_log, write_log
 from lib.procedures import train_and_evaluate
