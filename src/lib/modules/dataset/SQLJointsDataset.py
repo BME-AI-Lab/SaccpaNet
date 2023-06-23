@@ -2,6 +2,8 @@ from lib.modules.dataset.JointsDataset import JointsDataset
 import pandas as pd
 import numpy as np
 import logging
+from lib.modules.dataset.common import ResolveImage
+
 
 logger = logging.getLogger(__name__)
 from random import random, seed, randrange
@@ -119,7 +121,6 @@ class SQLJointsDataset(JointsDataset):
             return self.image_indexer
         assert self.image_query_string
         assert self.db_connection_string
-        from .common import ResolveImage
 
         self.image_indexer = ResolveImage(
             self.image_query_string, self.db_connection_string, resize=None
@@ -217,7 +218,7 @@ class SQLJointsDataset(JointsDataset):
 
 
 if __name__ == "__main__":
-    dataset = SQLJointsDataset(train=False)
+    dataset = SQLJointsDataset(train=True)
     db = dataset._get_db()
     ds_iter = iter(dataset)
     a, b, c, d = next(ds_iter)
@@ -225,10 +226,12 @@ if __name__ == "__main__":
 
     # test print joint
     a, b, c, d = next(ds_iter)
-    plt.imshow(a)
+    plt.imshow(a[0])
     plt.show()
     zeros = np.zeros_like(b[0])
     for i in range(18):
         zeros = zeros + b[i].numpy()
-        plt.imshow(b[i])
-        plt.show()
+        # plt.imshow(b[i])
+        # plt.show()
+    plt.imshow(zeros)
+    plt.show()

@@ -7,6 +7,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from .codec import MSRAHeatmap
 
 import copy
 import logging
@@ -17,7 +18,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from .utils.transforms import affine_transform,get_affine_transform,fliplr_joints
+from .utils.transforms import affine_transform, get_affine_transform, fliplr_joints
 
 
 logger = logging.getLogger(__name__)
@@ -25,38 +26,48 @@ logger = logging.getLogger(__name__)
 
 class JointsDataset(Dataset):
     def __init__(self, is_train, transform=None):
-        #root, image_set
+        # root, image_set
         self.num_joints = 0
         self.pixel_std = 200
         self.flip_pairs = []
         self.parent_ids = []
 
         self.is_train = is_train
-        
-        #self.root = root
-        #self.image_set = image_set
 
-        #as one off, instead of loading from cfg, hot patch 
-        #referencing cfg
+        # self.root = root
+        # self.image_set = image_set
+
+        # as one off, instead of loading from cfg, hot patch
+        # referencing cfg
 
         # self.output_path = cfg.OUTPUT_DIR # not used
-        self.data_format = "sql"#cfg.DATASET.DATA_FORMAT # not used
+        self.data_format = "sql"  # cfg.DATASET.DATA_FORMAT # not used
 
         # self.scale_factor = cfg.DATASET.SCALE_FACTOR # TBD:should be handled by co-transform
         # self.rotation_factor = cfg.DATASET.ROT_FACTOR # TBD:should be handled by co-transform
-        #self.flip = cfg.DATASET.FLIP
+        # self.flip = cfg.DATASET.FLIP
 
-        self.image_size = np.array((192,256))#(192,256) #cfg.MODEL.IMAGE_SIZE
-        self.target_type = "gaussian"#cfg.MODEL.EXTRA.TARGET_TYPE
-        self.heatmap_size = self.image_size#np.array((48,64))#cfg.MODEL.EXTRA.HEATMAP_SIZE
-        self.sigma = 6#2#cfg.MODEL.EXTRA.SIGMA
-        
-        self.scale_factor=0.3
+        self.image_size = np.array((192, 256))  # (192,256) #cfg.MODEL.IMAGE_SIZE
+        self.target_type = "gaussian"  # cfg.MODEL.EXTRA.TARGET_TYPE
+        self.heatmap_size = (
+            self.image_size
+        )  # np.array((48,64))#cfg.MODEL.EXTRA.HEATMAP_SIZE
+        self.sigma = 4  # 2#cfg.MODEL.EXTRA.SIGMA
+
+        self.scale_factor = 0.3
         self.flip = self.is_train
-        self.rotation_factor= 40
+        self.rotation_factor = 40
 
         self.transform = transform
         self.db = []
+
+        self.heatmap_generator = MSRAHeatmap(
+            self.image_size,
+            self.heatmap_size,
+            sigma=self.sigma,
+            unbiased=False,
+            # blur kernel size is not used for biased heatmap
+        )
 
     def _get_db(self):
         raise NotImplementedError
@@ -64,74 +75,77 @@ class JointsDataset(Dataset):
     def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
         raise NotImplementedError
 
-    def __len__(self,):
+    def __len__(
+        self,
+    ):
         return len(self.db)
 
     def _get_sql_image_connections(self):
         raise NotImplementedError
-    
-    def _get_numpy_image(self,idx):
+
+    def _get_numpy_image(self, idx):
         indexer = self._get_sql_image_connections()
         data_numpy = indexer(self.annotations_df.iloc[idx])
         return data_numpy
-    
+
     def __getitem__(self, idx):
         db_rec = copy.deepcopy(self.db[idx])
 
-        image_file = db_rec['image']
-        filename = db_rec['filename'] if 'filename' in db_rec else ''
-        imgnum = db_rec['imgnum'] if 'imgnum' in db_rec else ''
+        image_file = db_rec["image"]
+        filename = db_rec["filename"] if "filename" in db_rec else ""
+        imgnum = db_rec["imgnum"] if "imgnum" in db_rec else ""
 
-        if self.data_format == 'zip':
+        if self.data_format == "zip":  #: TBD: remove from  this file
             from utils import zipreader
+
             data_numpy = zipreader.imread(
-                image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+                image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
+            )
         elif self.data_format == "sql":
             data_numpy = self._get_numpy_image(idx)
-            
+
         else:
             assert False, "Need to define data_format"
             data_numpy = cv2.imread(
-                image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+                image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
+            )
 
         if data_numpy is None:
-            logger.error('=> fail to read {}'.format(image_file))
-            raise ValueError('Fail to read {}'.format(image_file))
+            logger.error("=> fail to read {}".format(image_file))
+            raise ValueError("Fail to read {}".format(image_file))
 
-        joints = db_rec['joints_3d']
-        joints_vis = db_rec['joints_3d_vis']
+        joints = db_rec["joints_3d"]
+        joints_vis = db_rec["joints_3d_vis"]
 
-        c = db_rec['center']
-        s = db_rec['scale']
-        score = db_rec['score'] if 'score' in db_rec else 1
-        r = 0
+        center = db_rec["center"]
+        scale = db_rec["scale"]
+        score = db_rec["score"] if "score" in db_rec else 1
+        rotation = 0
 
-        #TBD: handle by co-transform
+        # TBD: handle by co-transform
         flipped = False
         if self.is_train:
-            sf = self.scale_factor 
-            rf = self.rotation_factor
-            s = s * np.clip(np.random.randn()*sf + 1, 1 - sf, 1 + sf)
-            r = np.clip(np.random.randn()*rf, -rf*2, rf*2) \
-               if random.random() <= 0.6 else 0
+            scale, rotation = self.calculate_random_scale_and(scale)
 
             if self.flip and random.random() <= 0.5:
-                data_numpy = data_numpy[:, ::-1] #3 channels image only
-                joints, joints_vis = fliplr_joints(
-                    joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
-                c[0] = data_numpy.shape[1] - c[0] - 1
+                data_numpy, joints, joints_vis = self.flip_joints(
+                    joints, joints_vis, data_numpy, center
+                )
                 flipped = True
 
-        trans = get_affine_transform(c, s, r, self.image_size) # disabled for co-transfomr
+        trans = get_affine_transform(
+            center, scale, rotation, self.image_size
+        )  # disabled for co-transfomr
         #!!!Doubtable for cv2.warpAffine in float!!!
-        #"""
+        # """
         input = cv2.warpAffine(
             data_numpy,
             trans,
             (int(self.image_size[0]), int(self.image_size[1])),
-            flags=cv2.INTER_LINEAR)
-        #"""
-        #input = data_numpy
+            flags=cv2.INTER_LINEAR,
+        )
+        # """
+        # input = data_numpy
         if self.transform:
             input = self.transform(input)
 
@@ -144,19 +158,39 @@ class JointsDataset(Dataset):
         target = torch.from_numpy(target)
         target_weight = torch.from_numpy(target_weight)
         meta = {
-            'image': image_file,
-            'filename': filename,
-            'imgnum': imgnum,
-            'joints': joints,
-            'joints_vis': joints_vis,
-            'center': c,
-            'scale': s,
-            'rotation': r,
-            'score': score,
-            'flipped':flipped,
+            "image": image_file,
+            "filename": filename,
+            "imgnum": imgnum,
+            "joints": joints,
+            "joints_vis": joints_vis,
+            "center": center,
+            "scale": scale,
+            "rotation": rotation,
+            "score": score,
+            "flipped": flipped,
         }
 
         return input, target, target_weight, meta
+
+    def flip_joints(self, joints, joints_vis, data_numpy, c):
+        data_numpy = data_numpy[:, ::-1]  # 3 channels image only
+        joints, joints_vis = fliplr_joints(
+            joints, joints_vis, data_numpy.shape[1], self.flip_pairs
+        )
+        c[0] = data_numpy.shape[1] - c[0] - 1
+        return data_numpy, joints, joints_vis
+
+    def calculate_random_scale_and(self, s):
+        sf = self.scale_factor
+        rf = self.rotation_factor
+        s = s * np.clip(np.random.randn() * sf + 1, 1 - sf, 1 + sf)
+        r = (
+            np.clip(np.random.randn() * rf, -rf * 2, rf * 2)
+            if random.random() <= 0.6
+            else 0
+        )
+
+        return s, r
 
     def select_data(self, db):
         db_selected = []
@@ -164,8 +198,7 @@ class JointsDataset(Dataset):
             num_vis = 0
             joints_x = 0.0
             joints_y = 0.0
-            for joint, joint_vis in zip(
-                    rec['joints_3d'], rec['joints_3d_vis']):
+            for joint, joint_vis in zip(rec["joints_3d"], rec["joints_3d_vis"]):
                 if joint_vis[0] <= 0:
                     continue
                 num_vis += 1
@@ -177,71 +210,30 @@ class JointsDataset(Dataset):
 
             joints_x, joints_y = joints_x / num_vis, joints_y / num_vis
 
-            area = rec['scale'][0] * rec['scale'][1] * (self.pixel_std**2)
+            area = rec["scale"][0] * rec["scale"][1] * (self.pixel_std**2)
             joints_center = np.array([joints_x, joints_y])
-            bbox_center = np.array(rec['center'])
-            diff_norm2 = np.linalg.norm((joints_center-bbox_center), 2)
-            ks = np.exp(-1.0*(diff_norm2**2) / ((0.2)**2*2.0*area))
+            bbox_center = np.array(rec["center"])
+            diff_norm2 = np.linalg.norm((joints_center - bbox_center), 2)
+            ks = np.exp(-1.0 * (diff_norm2**2) / ((0.2) ** 2 * 2.0 * area))
 
             metric = (0.2 / 16) * num_vis + 0.45 - 0.2 / 16
             if ks > metric:
                 db_selected.append(rec)
 
-        logger.info('=> num db: {}'.format(len(db)))
-        logger.info('=> num selected db: {}'.format(len(db_selected)))
+        logger.info("=> num db: {}".format(len(db)))
+        logger.info("=> num selected db: {}".format(len(db_selected)))
         return db_selected
 
     def generate_target(self, joints, joints_vis):
-        '''
-        :param joints:  [num_joints, 3]
-        :param joints_vis: [num_joints, 3]
-        :return: target, target_weight(1: visible, 0: invisible)
-        '''
-        target_weight = np.ones((self.num_joints, 1), dtype=np.float32)
-        target_weight[:, 0] = joints_vis[:, 0]
+        # expand dims for heatmap generator to work
+        joints = np.expand_dims(joints[:, :2], axis=0)
+        joints_vis = np.expand_dims(joints_vis[:, 0], axis=0)
+        heatmap_dict = self.heatmap_generator.encode(joints, joints_vis)
+        heatmaps = heatmap_dict["heatmaps"]
+        # add dummy z axis back
+        # n, h, w, _ = heatmaps.shape
+        # heatmaps = np.concatenate([heatmaps, np.zeros((n, h, w, 1))], axis=3)
+        heatmap_weights = heatmap_dict["keypoint_weights"]
+        heatmap_weights = heatmap_weights.reshape((self.num_joints, 1))
 
-        assert self.target_type == 'gaussian', \
-            'Only support gaussian map now!'
-
-        if self.target_type == 'gaussian':
-            target = np.zeros((self.num_joints,
-                               self.heatmap_size[1],
-                               self.heatmap_size[0]),
-                              dtype=np.float32)
-
-            tmp_size = self.sigma * 3
-
-            for joint_id in range(self.num_joints):
-                feat_stride = self.image_size / self.heatmap_size
-                mu_x = int(joints[joint_id][0] / feat_stride[0] + 0.5)
-                mu_y = int(joints[joint_id][1] / feat_stride[1] + 0.5)
-                # Check that any part of the gaussian is in-bounds
-                ul = [int(mu_x - tmp_size), int(mu_y - tmp_size)]
-                br = [int(mu_x + tmp_size + 1), int(mu_y + tmp_size + 1)]
-                if ul[0] >= self.heatmap_size[0] or ul[1] >= self.heatmap_size[1] \
-                        or br[0] < 0 or br[1] < 0:
-                    # If not, just return the image as is
-                    target_weight[joint_id] = 0
-                    continue
-
-                # # Generate gaussian
-                size = 2 * tmp_size + 1
-                x = np.arange(0, size, 1, np.float32)
-                y = x[:, np.newaxis]
-                x0 = y0 = size // 2
-                # The gaussian is not normalized, we want the center value to equal 1
-                g = np.exp(- ((x - x0) ** 2 + (y - y0) ** 2) / (2 * self.sigma ** 2))
-
-                # Usable gaussian range
-                g_x = max(0, -ul[0]), min(br[0], self.heatmap_size[0]) - ul[0]
-                g_y = max(0, -ul[1]), min(br[1], self.heatmap_size[1]) - ul[1]
-                # Image range
-                img_x = max(0, ul[0]), min(br[0], self.heatmap_size[0])
-                img_y = max(0, ul[1]), min(br[1], self.heatmap_size[1])
-
-                v = target_weight[joint_id]
-                if v > 0.5:
-                    target[joint_id][img_y[0]:img_y[1], img_x[0]:img_x[1]] = \
-                        g[g_y[0]:g_y[1], g_x[0]:g_x[1]]
-
-        return target, target_weight
+        return heatmaps, heatmap_weights

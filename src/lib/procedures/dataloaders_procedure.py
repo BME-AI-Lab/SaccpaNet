@@ -8,9 +8,9 @@ def create_test_dataloader(BATCH_SIZE):
         test_dataset,
         batch_size=BATCH_SIZE,
         shuffle=False,
-        num_workers=2,
+        num_workers=4,
         pin_memory=True,
-        persistent_workers=2,
+        persistent_workers=4,
     )
 
     return test_dataloader
@@ -22,9 +22,9 @@ def create_train_dataloader(BATCH_SIZE):
         train_dataset,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        num_workers=2,
+        num_workers=4,
         pin_memory=True,
-        persistent_workers=2,
+        persistent_workers=4,
     )
 
     return train_dataloader

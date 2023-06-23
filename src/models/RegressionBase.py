@@ -24,8 +24,8 @@ class RegressionModule(pl.LightningModule):
     def get_batch_output(self, batch):
         input, target, target_weight, meta = batch
         # print(meta.keys())
-        joints = meta["joints"].flatten(start_dim=1)
-        regress, classify = self(input, joints)
+        # joints = meta["joints"].flatten(start_dim=1)
+        regress, classify = self(input)  # , joints)
         return {"classify": classify, "regress": regress}
 
     def training_step(self, batch, batch_idx):
