@@ -11,7 +11,7 @@ import gc
 
 log_file = "log.csv"
 if __name__ == "__main__":
-    MODEL_NAME = "saccpa_sample"
+    MODEL_NAME = "SACCPA_sample"
     SAMPLES = sample_cfgs(seed=seed, sample_size=1)
     BATCH_SIZE = 8
     TOTAL_EPOCH = 300
