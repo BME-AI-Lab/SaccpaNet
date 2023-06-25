@@ -47,9 +47,9 @@ class JointsDataset(Dataset):
         # self.rotation_factor = cfg.DATASET.ROT_FACTOR # TBD:should be handled by co-transform
         # self.flip = cfg.DATASET.FLIP
 
-        self.image_size = np.array((192, 256))  # (192,256) #cfg.MODEL.IMAGE_SIZE
+        self.image_size = np.array((384, 512))  # (192,256) #cfg.MODEL.IMAGE_SIZE
         self.target_type = "gaussian"  # cfg.MODEL.EXTRA.TARGET_TYPE
-        self.heatmap_size = np.array((24, 32))
+        self.heatmap_size = np.array((48, 64))
         self.sigma = 2  # 2#cfg.MODEL.EXTRA.SIGMA
 
         self.scale_factor = 0.3

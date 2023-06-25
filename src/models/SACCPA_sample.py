@@ -2,7 +2,7 @@ from models.RegressionBase import RegressionModule
 from torch import nn
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
-from lib.networks.SegNext import SegNextU
+from lib.networks.SegNext import SaccpaNet
 
 
 class MyLightningModule(RegressionModule):
@@ -15,7 +15,7 @@ class MyLightningModule(RegressionModule):
         self.init_conv = nn.Conv2d(
             in_channels=1, out_channels=3, kernel_size=1, padding=0
         ).cuda()
-        self.net = SegNextU(params, num_classes=num_classes)
+        self.net = SaccpaNet(params, num_classes=num_classes)
         self.preNorm = nn.BatchNorm2d(num_features=1)
 
     def forward(self, input):
