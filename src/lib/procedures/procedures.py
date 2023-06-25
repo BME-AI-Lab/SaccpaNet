@@ -83,6 +83,8 @@ def train_model(
     test_dataloader,
     epoch,
 ):
+    import helper.tqdm_hook
+
     checkpoint_callback_best = ModelCheckpoint(
         save_top_k=1,
         monitor="val_loss",
