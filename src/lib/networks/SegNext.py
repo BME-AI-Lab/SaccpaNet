@@ -705,6 +705,6 @@ class SaccpaNet(nn.Module):
         # x = x[self.in_index]
         x = self.head(x)
         # x= resize()
-        x = F.tanh(x)  # doubt
+        x = F.sigmoid(x)  # doubt
         # x = resize(x, (256, 192))  # doubt
         return x
