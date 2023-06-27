@@ -25,6 +25,13 @@ This provides the networks, data set, and configs shared by the expriment, which
 pip install -e . 
 ```
 
+## installing dependencies for mmpose
+``` batch
+pip install -U openmim
+mim install mmengine
+mim install "mmcv>-2.0.0"
+mim install "mmpose>=1.0.0"
+```
 
 ## Additional dependecies for building the documentation
 ``` batch

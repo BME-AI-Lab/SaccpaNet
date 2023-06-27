@@ -39,7 +39,8 @@ Update ```configs.random_seaerch_params.py``` with the best results from this st
 ### Runing the models
 
 ``` batch
-cd 01-Random_search
+:: Starting from root repo
+cd 02-Manual_Search
 :: Generate the list of random seeds for search
 mkdir runs
 python generate_runs.py
@@ -55,3 +56,11 @@ See [Aggregate result from random search](#aggregating-the-results).
 
 
 ## Pretraining
+
+Patch mmpose with our custom data.
+``` batch
+cd 03-Pretraining
+git clone https://github.com/open-mmlab/mmpose.git
+rclone copy patched_codes/ mmpose
+
+```

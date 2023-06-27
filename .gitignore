@@ -27,3 +27,4 @@ set_env.bat
 benchmark/
 *.zip
 *.7z
+03-Pretraining/mmpose/
