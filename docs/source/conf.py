@@ -62,4 +62,5 @@ autodoc_mock_imports = [
     "pyccotools",
     "mmcv",
     "numpy.core.multiarray",
+    "sqlalchemy",
 ]

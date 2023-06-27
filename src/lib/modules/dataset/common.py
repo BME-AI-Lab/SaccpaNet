@@ -1,10 +1,7 @@
-from functools import lru_cache
 import sqlalchemy
 import cv2
 import numpy as np
-from collections import namedtuple
 import pickle
-from functools import lru_cache
 from threading import Lock
 from sqlalchemy.pool import StaticPool
 

@@ -169,19 +169,14 @@ class UAttentionLayer(nn.Module):
 
 
 class UAttention(nn.Module):
-    def __init__(self, dim):
+    def __init__(self, dim, reduction_ratio=[2, 2]):
         super().__init__()
-        image_size = 512
-        reduction = 2, 2
-
         self.conv0 = nn.Conv2d(dim, dim, 5, padding=2, groups=dim)
         self.down1_0 = UAttentionLayer(dim)
-        self.down1_1 = nn.MaxPool2d(reduction[0])
+        self.down1_1 = nn.MaxPool2d(reduction_ratio[0])
         self.down2_0 = UAttentionLayer(dim)
-        self.down2_1 = nn.MaxPool2d(reduction[1])
+        self.down2_1 = nn.MaxPool2d(reduction_ratio[1])
         self.down3_0 = UAttentionLayer(dim)
-
-        # self.conv3 = nn.Conv2d(dim, dim, 1)
         self.conv3 = nn.Conv2d(dim * 3, dim, 1)
 
     def forward(self, x):
@@ -307,28 +302,13 @@ class SACCPA(nn.Module):
         self,
         in_chans=3,
         embed_dims=[64, 128, 256, 512],
-        mlp_ratios=[4, 4, 4, 4],
+        mlp_ratios=[8, 8, 4, 4],
         drop_rate=0.0,
         drop_path_rate=0.0,
         depths=[3, 4, 6, 3],
         num_stages=4,
-        pretrained=None,
-        init_cfg=None,
     ):
         super(SACCPA, self).__init__()
-
-        assert not (
-            init_cfg and pretrained
-        ), "init_cfg and pretrained cannot be set at the same time"
-        if isinstance(pretrained, str):
-            warnings.warn(
-                "DeprecationWarning: pretrained is deprecated, "
-                'please use "init_cfg" instead'
-            )
-            self.init_cfg = dict(type="Pretrained", checkpoint=pretrained)
-        elif pretrained is not None:
-            raise TypeError("pretrained must be a str or None")
-
         self.depths = depths
         self.num_stages = num_stages
 
@@ -367,19 +347,15 @@ class SACCPA(nn.Module):
             setattr(self, f"norm{i + 1}", norm)
 
     def init_weights(self):
-        print("init cfg", self.init_cfg)
-        if self.init_cfg is None:
-            for m in self.modules():
-                if isinstance(m, nn.Linear):
-                    trunc_normal_init(m, std=0.02, bias=0.0)
-                elif isinstance(m, nn.LayerNorm):
-                    constant_init(m, val=1.0, bias=0.0)
-                elif isinstance(m, nn.Conv2d):
-                    fan_out = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                    fan_out //= m.groups
-                    normal_init(m, mean=0, std=math.sqrt(2.0 / fan_out), bias=0)
-        else:
-            super(SACCPA, self).init_weights()
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                trunc_normal_init(m, std=0.02, bias=0.0)
+            elif isinstance(m, nn.LayerNorm):
+                constant_init(m, val=1.0, bias=0.0)
+            elif isinstance(m, nn.Conv2d):
+                fan_out = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                fan_out //= m.groups
+                normal_init(m, mean=0, std=math.sqrt(2.0 / fan_out), bias=0)
 
     def forward(self, x):
         B = x.shape[0]
@@ -673,38 +649,55 @@ class LightHamHead(nn.Module):
 
 
 class SaccpaNet(nn.Module):
-    def __init__(self, params={}, num_classes=18):
+    def __init__(self, params={}, num_joints=18):
+        """SCAPPA based regression Network.
+
+
+        Args:
+            params (dict, optional): The generated search parameters from the Sampling process.
+            num_joints (int, optional): The number of joints. Defaults to 18.
+        """
         super().__init__()
-        assert len(params) > 0
+        assert len(params) > 0  # check if params is empty
         self.params = params
-        ws, ds, ss, bs, gs = generate_regnet_full(params)
+        ws, ds, _, _, _ = generate_regnet_full(params)
         self.ws, self.ds = ws, ds
         self.head_input = sum(ws[1:4])
         self.backbone = SACCPA(
-            in_chans=3,
+            in_chans=3,  # in_chans is fixed at 3 to maintain compatibility with coco pretraining
             embed_dims=ws,  # [64, 128, 320, 512],
             depths=ds,  # [2, 2, 4, 2],
             mlp_ratios=[8, 8, 4, 4],  # mlp ratio need
             drop_rate=0.0,
             drop_path_rate=0.1,
         )
+        head_in_index = [1, 2, 3]
+        in_channels = [ws[i] for i in head_in_index]
 
+        channels = 1024
+        ham_channels = 1024
+        ham_dropout_ratio = 0.1
         self.head = LightHamHead(
-            in_channels=ws[1:4],  # [self.head_input, 320, 512],
-            in_index=[1, 2, 3],
-            channels=1024,
-            ham_channels=1024,
-            dropout_ratio=0.1,
-            num_classes=18,
+            in_channels=in_channels,  # [self.head_input, 320, 512],
+            in_index=head_in_index,
+            channels=channels,
+            ham_channels=ham_channels,
+            dropout_ratio=ham_dropout_ratio,
+            num_classes=num_joints,
         )
         # self.in_index = [1,2,3]
 
     def forward(self, input):
+        """Forward fuction
+
+        Args:
+            input (Tensor): input tensor of shape (N, C, H, W)
+
+        Returns:
+            Tensor: (N,C,H/8, W/8)
+        """
         x = input
         x = self.backbone(x)
-        # x = x[self.in_index]
         x = self.head(x)
-        # x= resize()
-        x = F.sigmoid(x)  # doubt
-        # x = resize(x, (256, 192))  # doubt
+        x = F.sigmoid(x)
         return x
