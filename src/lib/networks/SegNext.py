@@ -571,8 +571,6 @@ class LightHamHead(nn.Module):
     Args:
         ham_channels (int): input channels for Hamburger.
         ham_kwargs (int): kwagrs for Ham.
-    TODO:
-        Add other MD models (Ham).
     """
 
     def __init__(
