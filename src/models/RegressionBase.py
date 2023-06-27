@@ -17,11 +17,27 @@ class RegressionModule(pl.LightningModule):
         self.classification_loss = nn.CrossEntropyLoss()
 
     def forward(self, input):
+        """forward _summary_
+
+        Args:
+            input (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         input = input.float().cuda()
         regress, classify = self.net(input)
         return regress, classify
 
     def get_batch_output(self, batch):
+        """get_batch_output _summary_
+
+        Args:
+            batch (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         input, target, target_weight, meta = batch
         # print(meta.keys())
         # joints = meta["joints"].flatten(start_dim=1)
@@ -29,6 +45,15 @@ class RegressionModule(pl.LightningModule):
         return {"classify": classify, "regress": regress}
 
     def training_step(self, batch, batch_idx):
+        """training_step _summary_
+
+        Args:
+            batch (_type_): _description_
+            batch_idx (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         loss, acc, class_acc = self.loss_calculation(batch)
         self.log(
             "train_joint_acc",
@@ -51,6 +76,14 @@ class RegressionModule(pl.LightningModule):
         return {"loss": loss, "train_loss": loss, "train_joint_acc": acc}  #
 
     def loss_calculation(self, batch):
+        """loss_calculation _summary_
+
+        Args:
+            batch (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         input, target, target_weight, meta = batch
         result = self.get_batch_output(batch)
         regress = result["regress"]
@@ -108,6 +141,11 @@ class RegressionModule(pl.LightningModule):
         return {"test_loss": loss, "test_joint_acc": acc}
 
     def configure_optimizers(self):
+        """configure_optimizers for the networks by importing the hyperparameters from hyperparameters.py
+
+        Returns:
+            List[torch.optim.Optimizer]: A list of optimizers for the networks, in this case, only one optimizer is used.
+        """
         self.lr = lr
         self.l2 = l2
         self.optimizer = torch.optim.Adam(

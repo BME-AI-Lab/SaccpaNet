@@ -6,8 +6,13 @@ The code is tested on windows, and in theory should also work on linux.
 ### Using Windows with conda
 Create the `pytorch-mamba` python environment based and conda and the provided enviroment.yml
 ``` batch
-conda create -f environment.yml
-coknda activate pytorch-mamba
+conda env create -f environment.yml
+condfa activate posture_experiment
+```
+### Building the environment from scratch with conda
+``` batch
+
+
 ```
 
 ## Install the local project
