@@ -12,6 +12,7 @@ Welcome to Posture Experiment's documentation!
 
    project_organization
    code_running.md
+   experiments.md
    reference_index
 
 
