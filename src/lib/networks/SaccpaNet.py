@@ -193,7 +193,6 @@ class UAttention(nn.Module):
         # attn_2 = self.down3_1(attn_2)
         attn_1 = nn.functional.interpolate(attn_1.clone(), u.shape[2:], mode="bilinear")
         attn_2 = nn.functional.interpolate(attn_2.clone(), u.shape[2:], mode="bilinear")
-        # attn = attn + attn_0 + attn_1 + attn_2
         attn = torch.concat([attn_0, attn_1, attn_2], axis=1)
 
         attn = self.conv3(attn)

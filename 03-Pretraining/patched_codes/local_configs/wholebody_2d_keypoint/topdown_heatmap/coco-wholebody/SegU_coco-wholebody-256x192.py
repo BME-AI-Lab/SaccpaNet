@@ -54,7 +54,7 @@ model = dict(
         bgr_to_rgb=True,
     ),
     backbone=dict(
-        type="MSCAU",
+        type="SaccpaNet",
         in_channels=3,
         embed_dims=ws,  # [32, 64, 160, 256],
         mlp_ratios=[8, 8, 4, 4],  # mlp ratio need

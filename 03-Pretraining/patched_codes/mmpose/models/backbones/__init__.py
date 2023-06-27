@@ -26,7 +26,7 @@ from .v2v_net import V2VNet
 from .vgg import VGG
 from .vipnas_mbv3 import ViPNAS_MobileNetV3
 from .vipnas_resnet import ViPNAS_ResNet
-from .mscau import MSCAU
+from .saccpa import SACCPA_net
 
 __all__ = [
     "AlexNet",
@@ -58,5 +58,5 @@ __all__ = [
     "PyramidVisionTransformer",
     "PyramidVisionTransformerV2",
     "SwinTransformer",
-    "MSCAU",
+    "SACCPA_net",
 ]

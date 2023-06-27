@@ -2,7 +2,7 @@ from models.RegressionBase import RegressionModule
 from torch import nn
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
-from lib.networks.SegNext import SaccpaNet
+from lib.networks.SaccpaNet import SaccpaNet
 
 
 class MyLightningModule(RegressionModule):

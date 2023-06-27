@@ -1,6 +1,6 @@
 import torch.nn as nn
 import math
-from .SegNext import SpatialAttention
+from .SaccpaNet import SpatialAttention
 
 # import torch.utils.model_zoo as model_zoo
 
