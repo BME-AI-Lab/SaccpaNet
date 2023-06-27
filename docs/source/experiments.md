@@ -55,7 +55,7 @@ See [Aggregate result from random search](#aggregating-the-results).
 ### Analysis
 
 
-## Pretraining
+## 03. Pretraining
 
 Patch mmpose with our custom data.
 ``` batch
@@ -64,3 +64,32 @@ git clone https://github.com/open-mmlab/mmpose.git
 rclone copy patched_codes/ mmpose
 
 ```
+Obtain and prepare the *COCO whole-body dataset* according to [MMPose's instruction](https://mmpose.readthedocs.io/en/latest/dataset_zoo/2d_wholebody_keypoint.html#coco-wholebody). 
+
+## 04. Weight transfer
+Copy the saved weight from MMPose checkpoint folder ```{folder}``` to ```04--Weight_transfer```
+
+``` batch
+cd 04-Weight_Transfer
+:: Generate the checkpoint base 
+python generate_checkpoint_template.py
+:: Transfer the checkpoint
+python transfer_weight.py best_coco-wholebody_AP_epoch_*.pth template_checkpoint.pth merged_model.pth 
+```
+
+## 05. Finetuning
+
+``` batch
+:: Copy the transfered weight to 05-Finetuning folder 
+copy 04-Weight_Transfer/merged_model.pth 05-Finetuning/merged_model.pth
+:: Run the training
+python finetune_parameterized_by_config.py
+```
+
+## 06. Posture Classification
+``` batch
+:: Copy the joint coordinate model weight to 06-Posture_Classification
+copy 05-Finetuning/merged_model.pth 06-Posture_Classification
+:: Generate the runs for all classification models being tried.
+python 
+

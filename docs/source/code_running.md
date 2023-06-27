@@ -7,12 +7,12 @@ The code is tested on windows, and in theory should also work on linux.
 Create the `pytorch-mamba` python environment based and conda and the provided enviroment.yml
 ``` batch
 conda env create -f environment.yml
-condfa activate posture_experiment
+conda activate posture_experiment
 ```
 ### Building the environment from scratch with conda and pip
 Please be aware that pytorch-lightning and sqlsalchemy are setted to specific version as newer versions introduces breaking changes. 
 ``` batch
-mamba create -n posture_experiment -c pytorch -c nvidia -c conda-forge -c default python=3.9 pytorch torchvision torchaudio pytorch-cuda pandas seaborn -y
+conda create -n posture_experiment -c pytorch -c nvidia -c conda-forge -c default python=3.9 pytorch torchvision torchaudio pytorch-cuda pandas seaborn -y
 conda activate posture_experiment
 pip install pytorch-lightning==1.6.4 SQLAlchemy==1.4.48 opencv-python scikit-learn tqdm torchmetrics
 ```
