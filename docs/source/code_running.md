@@ -37,3 +37,8 @@ mim install "mmpose>=1.0.0"
 ``` batch
 pip install sphinx myst-parser sphinx-copybutton sphinx-markdown-tables sphinx-rtd-theme
 ```
+
+## Additional dependenceis for building tests
+``` batch
+pip install coverage pytest xdoctest
+```
