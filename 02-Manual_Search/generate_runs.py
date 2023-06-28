@@ -1,6 +1,7 @@
 import shutil
-from configs.random_searched_params import params
 from copy import deepcopy
+
+from configs.random_searched_params import params
 
 
 def copy_and_write(representation, params):

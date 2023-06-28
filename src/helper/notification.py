@@ -1,6 +1,7 @@
-from tqdm.contrib.telegram import tqdm as _tqdm
-from functools import partial
 import os
+from functools import partial
+
+from tqdm.contrib.telegram import tqdm as _tqdm
 
 
 def get_telegram_tqdm(token=None, chat_id=None):

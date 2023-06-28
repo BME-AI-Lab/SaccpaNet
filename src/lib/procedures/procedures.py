@@ -1,7 +1,8 @@
+import importlib
 from glob import glob
 from os.path import dirname
+
 import pytorch_lightning as pl
-import importlib
 import torch
 from pytorch_lightning.callbacks import ModelCheckpoint
 

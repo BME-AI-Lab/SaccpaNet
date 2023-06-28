@@ -1,6 +1,7 @@
-from torch import nn
-import torch
 import warnings
+
+import torch
+from torch import nn
 
 
 def constant_init(module: nn.Module, val: float, bias: float = 0) -> None:

@@ -1,10 +1,12 @@
-from .common import SQL_indexer
 import pickle
-import cv2
 import uuid
+from functools import lru_cache
+
+import cv2
 import numpy as np
 import sqlalchemy
-from functools import lru_cache
+
+from .common import SQL_indexer
 
 
 class ImageHandler:

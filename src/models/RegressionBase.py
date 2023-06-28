@@ -1,9 +1,11 @@
+import pytorch_lightning as pl
 import torch
+from torch import nn
+
 from lib.modules.core.function import accuracy
 from lib.modules.core.loss import JointsMSELoss
-from .hyperparameters import lr, l2
-import pytorch_lightning as pl
-from torch import nn
+
+from .hyperparameters import l2, lr
 
 
 class RegressionModule(pl.LightningModule):

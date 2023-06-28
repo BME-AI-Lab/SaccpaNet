@@ -1,5 +1,6 @@
-from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 from torch.utils.data.dataloader import DataLoader
+
+from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 
 
 def create_test_dataloader(BATCH_SIZE):

@@ -1,6 +1,7 @@
-from tqdm.contrib.telegram import tqdm as _tqdm
-from functools import partial
 import os
+from functools import partial
+
+from tqdm.contrib.telegram import tqdm as _tqdm
 
 token = os.environ.get("TELEGRAM_TOKEN")
 chat_id = os.environ.get("TELEGRAM_CHAT_ID")
@@ -19,8 +20,8 @@ def get_telegram_tqdm(token=None, chat_id=None):
 # Progress bar hack
 
 if token is not None and chat_id is not None:
-    import tqdm.auto
     import tqdm
+    import tqdm.auto
 
     tqdm.auto.tqdm = get_telegram_tqdm()
     tqdm.tqdm = get_telegram_tqdm()

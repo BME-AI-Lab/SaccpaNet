@@ -2,8 +2,8 @@
 
 import glob
 import os
-from os import path
 import subprocess
+from os import path
 from time import sleep
 
 result = ""

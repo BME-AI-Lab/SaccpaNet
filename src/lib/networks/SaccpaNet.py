@@ -1,8 +1,10 @@
-import torch
-import torch.nn as nn
 import math
 import warnings
+
+import torch
+import torch.nn as nn
 from torch.nn.modules.utils import _pair as to_2tuple
+
 from ..modules.core.sampler import generate_regnet_full
 from .parameter_init import *
 

@@ -1,16 +1,10 @@
-from lib.modules.core.sample_range import (
-    BOT_MUL,
-    DEPTH,
-    GROUP_W,
-    NUM_STAGES,
-    W0,
-    WA,
-    WM,
-)
-from . import rand
-
 # import rand
 import numpy as np
+
+from lib.modules.core.sample_range import (BOT_MUL, DEPTH, GROUP_W, NUM_STAGES,
+                                           W0, WA, WM)
+
+from . import rand
 
 
 def regnet_sampler():

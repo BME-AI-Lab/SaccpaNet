@@ -1,11 +1,9 @@
-from lib.procedures import (
-    create_load_cls_kpt,
-    create_validation_dataloader,
-    inference_model_classification_coordinate,
-    evaluate_cls,
-)
 from sklearn.metrics import *
+
 from configs.manually_searched_params import params
+from lib.procedures import (create_load_cls_kpt, create_validation_dataloader,
+                            evaluate_cls,
+                            inference_model_classification_coordinate)
 
 KEYPOINT_MODELS = "saccpa_sample"
 CLASSIFICATION_MODELS = "ScappaClass"

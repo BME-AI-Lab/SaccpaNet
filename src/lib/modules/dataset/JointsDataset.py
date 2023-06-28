@@ -4,10 +4,7 @@
 # Written by Bin Xiao (Bin.Xiao@microsoft.com)
 # ------------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from .codec import MSRAHeatmap
+from __future__ import absolute_import, division, print_function
 
 import copy
 import logging
@@ -18,8 +15,9 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from .utils.transforms import affine_transform, get_affine_transform, fliplr_joints
-
+from .codec import MSRAHeatmap
+from .utils.transforms import (affine_transform, fliplr_joints,
+                               get_affine_transform)
 
 logger = logging.getLogger(__name__)
 

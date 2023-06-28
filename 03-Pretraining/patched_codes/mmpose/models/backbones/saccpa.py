@@ -1,9 +1,11 @@
-import torch
-import torch.nn as nn
-import torch.functional as F
 import math
 import warnings
+
+import torch
+import torch.functional as F
+import torch.nn as nn
 from torch.nn.modules.utils import _pair as to_2tuple
+
 from lib.modules.core.sampler import generate_regnet_full
 
 

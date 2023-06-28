@@ -1,18 +1,12 @@
 import csv
-from itertools import cycle
 import os
+from itertools import cycle
 
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import (
-    auc,
-    classification_report,
-    confusion_matrix,
-    f1_score,
-    roc_auc_score,
-    roc_curve,
-    top_k_accuracy_score,
-)
+from sklearn.metrics import (auc, classification_report, confusion_matrix,
+                             f1_score, roc_auc_score, roc_curve,
+                             top_k_accuracy_score)
 from torch import nn
 
 

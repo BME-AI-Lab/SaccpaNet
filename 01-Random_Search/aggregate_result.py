@@ -1,5 +1,5 @@
-import glob
 import csv
+import glob
 
 
 def read_csv_to_dict(f):

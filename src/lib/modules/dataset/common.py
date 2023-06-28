@@ -1,8 +1,9 @@
-import sqlalchemy
-import cv2
-import numpy as np
 import pickle
 from threading import Lock
+
+import cv2
+import numpy as np
+import sqlalchemy
 from sqlalchemy.pool import StaticPool
 
 _lock = Lock()

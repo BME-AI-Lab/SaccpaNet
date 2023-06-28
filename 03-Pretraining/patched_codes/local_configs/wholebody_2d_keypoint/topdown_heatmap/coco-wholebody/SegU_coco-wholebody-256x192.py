@@ -1,7 +1,6 @@
 # model settings
-from lib.modules.core.sampler import generate_regnet_full
 from configs.manually_searched_params import params as sample_params
-
+from lib.modules.core.sampler import generate_regnet_full
 
 ws, ds, ss, bs, gs = generate_regnet_full(sample_params)
 norm_cfg = dict(type="BN", requires_grad=True)

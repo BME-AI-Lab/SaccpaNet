@@ -1,5 +1,7 @@
-import torch
 import importlib
+
+import torch
+
 from configs.manually_searched_params import params
 
 if __name__ == "__main__":

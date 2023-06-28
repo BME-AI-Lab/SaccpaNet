@@ -1,5 +1,7 @@
 # %%
-import pandas as pd, sqlite3
+import sqlite3
+
+import pandas as pd
 
 DB_CONNECTION_STRING = "mysql+pymysql://root:bmepolyu@nas.polyu.eu.org/bmepolyu"
 

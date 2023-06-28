@@ -1,10 +1,12 @@
 import torch
-from .hyperparameters import lr, l2
-from lib.modules.core.loss import JointsMSELoss
 import torchvision.models as models
 from torch import nn
-from .ClassificationBase import ClassificationModule
+
+from lib.modules.core.loss import JointsMSELoss
 from lib.modules.core.SpatialSoftArgmax2d import SpatialSoftArgmax2d
+
+from .ClassificationBase import ClassificationModule
+from .hyperparameters import l2, lr
 
 
 class MyLightningModule(ClassificationModule):

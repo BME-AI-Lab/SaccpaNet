@@ -1,7 +1,9 @@
 ### thsis is adpopeted from the OpenMMLab implementation of MSRAHeatmap approach
 
 from itertools import product
+
 import numpy as np
+
 from .heatmap_utils import *
 
 

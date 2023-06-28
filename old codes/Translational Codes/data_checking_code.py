@@ -1,9 +1,10 @@
 # check the coordinate
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 from itertools import combinations
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 
 error_set = set()
 

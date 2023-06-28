@@ -1,12 +1,13 @@
-from lib.modules.dataset.JointsDataset import JointsDataset
-import pandas as pd
-import numpy as np
 import logging
-from lib.modules.dataset.common import ResolveImage
 
+import numpy as np
+import pandas as pd
+
+from lib.modules.dataset.common import ResolveImage
+from lib.modules.dataset.JointsDataset import JointsDataset
 
 logger = logging.getLogger(__name__)
-from random import random, seed, randrange
+from random import random, randrange, seed
 
 seed(42)
 import functools

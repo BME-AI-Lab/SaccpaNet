@@ -1,5 +1,5 @@
-from lib.procedures import create_cls_kpt
 from lib.procedures import *
+from lib.procedures import create_cls_kpt
 
 if __name__ == "__main__":
     KEYPOINT_MODELS = "saccpa_sample"

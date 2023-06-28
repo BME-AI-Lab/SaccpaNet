@@ -1,13 +1,14 @@
+import argparse
+import filecmp
 import os
 import pathlib
-import subprocess
 import shutil
-import filecmp
+import subprocess
 import tempfile
-from os.path import join
-import argparse
 from contextlib import contextmanager
+from os.path import join
 from tkinter import filedialog
+
 from tqdm import tqdm
 
 

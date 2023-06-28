@@ -15,6 +15,7 @@ from .resnest import ResNeSt
 from .resnet import ResNet, ResNetV1d
 from .resnext import ResNeXt
 from .rsn import RSN
+from .saccpa import SACCPA_net
 from .scnet import SCNet
 from .seresnet import SEResNet
 from .seresnext import SEResNeXt
@@ -26,7 +27,6 @@ from .v2v_net import V2VNet
 from .vgg import VGG
 from .vipnas_mbv3 import ViPNAS_MobileNetV3
 from .vipnas_resnet import ViPNAS_ResNet
-from .saccpa import SACCPA_net
 
 __all__ = [
     "AlexNet",

@@ -1,11 +1,12 @@
 """Run all the runs locally in the folder """
+import argparse
 import glob
 import os
 from os import path
-import argparse
 from time import sleep
 
 from tqdm import tqdm
+
 from .notification import get_telegram_tqdm
 
 if __name__ == "__main__":
