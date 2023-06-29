@@ -4,7 +4,7 @@ from lib.modules.dataset.SQLJointsDataset import SQLJointsDataset
 
 
 def create_test_dataloader(BATCH_SIZE):
-    test_dataset = SQLJointsDataset(train=False)
+    test_dataset = SQLJointsDataset(is_train=False)
     test_dataloader = DataLoader(
         test_dataset,
         batch_size=BATCH_SIZE,
@@ -18,7 +18,7 @@ def create_test_dataloader(BATCH_SIZE):
 
 
 def create_train_dataloader(BATCH_SIZE):
-    train_dataset = SQLJointsDataset(train=True)
+    train_dataset = SQLJointsDataset(is_train=True)
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=BATCH_SIZE,
@@ -40,12 +40,12 @@ def create_dataloaders(BATCH_SIZE):
 def create_validation_dataloader(BATCH_SIZE, WITH_QUILT, VALIDATION):
     if WITH_QUILT:
         val_dataset = SQLJointsDataset(
-            train=False, mixed=False, all_quilt=True, validation=VALIDATION
+            is_train=False, mixed=False, all_quilt=True, validation=VALIDATION
         )
         quilt_conditions = "all_quilts"
     else:
         val_dataset = SQLJointsDataset(
-            train=False, mixed=False, all_quilt=False, validation=VALIDATION
+            is_train=False, mixed=False, all_quilt=False, validation=VALIDATION
         )
         quilt_conditions = "no_quilts"
     val_dataloader = DataLoader(

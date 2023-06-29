@@ -1,10 +1,16 @@
 # import rand
 import numpy as np
 
-from lib.modules.core.sample_range import (BOT_MUL, DEPTH, GROUP_W, NUM_STAGES,
-                                           W0, WA, WM)
-
-from . import rand
+from lib.modules.core import rand
+from lib.modules.core.sample_range import (
+    BOT_MUL,
+    DEPTH,
+    GROUP_W,
+    NUM_STAGES,
+    W0,
+    WA,
+    WM,
+)
 
 
 def regnet_sampler():
@@ -118,7 +124,7 @@ def sample_cfgs(seed, sample_size=32):
     # setup_cfg = sweep_cfg.SETUP
     cfgs = {}
     # sample_size = 32
-    for _ in range(10000000):
+    while True:
         # Sample parameters [key, val, ...] list based on the samplers
         params = sample_parameters()
         # Check if config is unique, if not continue
@@ -152,3 +158,11 @@ def sample_cfgs(seed, sample_size=32):
         if len(cfgs) >= sample_size:
             break
     return cfgs
+
+
+if __name__ == "__main__":
+    for i in range(10):
+        sample = regnet_sampler()
+        print(sample)
+        results = generate_regnet_full(sample)
+        print(results)

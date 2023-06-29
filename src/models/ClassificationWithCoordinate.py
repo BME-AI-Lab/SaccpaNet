@@ -15,7 +15,7 @@ class MyLightningModule(ClassificationModule):
         super().__init__()
         self.init_conv = nn.Conv2d(
             in_channels=1, out_channels=3, kernel_size=1, padding=0
-        ).cuda()
+        )
         self.coordinate_net = JointNetwork
         # Disable training to coordinate network
         for param in self.coordinate_net.parameters():
@@ -25,16 +25,13 @@ class MyLightningModule(ClassificationModule):
         self.classify_net = ClassifyNetwork
         self.loss = nn.CrossEntropyLoss()
         self.dense = nn.Linear(1036, 256, bias=True)
-        self.end = nn.Sequential(
-            nn.ELU(),
-            nn.Linear(256, num_classes),
-        )
+        self.end = nn.GELU()
         self.dense3 = nn.Linear(256, num_classes)
         self.preNorm = nn.BatchNorm2d(num_features=1)
         self.spatialSoftArgMax = SpatialSoftArgmax2d(normalized_coordinates=True)
 
     def forward(self, input):
-        input = input.float().cuda()
+        input = input.float()
         input = self.preNorm(input)
         x = self.init_conv(input)
         with torch.no_grad():

@@ -22,7 +22,7 @@ class ClassificationModule(pl.LightningModule):
         self.softmax = nn.Softmax()
 
     def forward(self, input):
-        input = input.float().cuda()
+        input = input.float()
         input = self.conv(input)
         classify = self.net(input)
         return classify
@@ -79,3 +79,35 @@ class ClassificationModule(pl.LightningModule):
         )
 
         return [self.optimizer]
+
+    def loss_calculation(self, batch):
+        _, _, _, meta = batch
+        result = self.get_batch_output(batch)
+        classify = result["classify"]
+        # target = target[:,0]#,:]
+
+        # regression_loss = self.joint_loss(regress,target,target_weight) * 1000
+        class_target = meta["posture"]
+        classification_loss = self.classification_loss(
+            classify, class_target
+        )  # , y.argmax(dim=1)
+        loss = classification_loss
+        class_acc = (classify.argmax(dim=-1) == class_target).float().mean()
+        # _, joint_acc, cnt, pred = accuracy(regress.detach().cpu().numpy(),
+        #                                  target.detach().cpu().numpy())
+        return loss, None, class_acc
+
+    def get_batch_output(self, batch):
+        """get_batch_output _summary_
+
+        Args:
+            batch (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        input, target, target_weight, meta = batch
+        # print(meta.keys())
+        # joints = meta["joints"].flatten(start_dim=1)
+        regress, classify = self(input)  # , joints)
+        return {"classify": classify, "regress": regress}

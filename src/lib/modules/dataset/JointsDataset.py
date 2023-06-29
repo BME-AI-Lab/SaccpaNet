@@ -16,8 +16,7 @@ import torch
 from torch.utils.data import Dataset
 
 from .codec import MSRAHeatmap
-from .utils.transforms import (affine_transform, fliplr_joints,
-                               get_affine_transform)
+from .utils.transforms import affine_transform, fliplr_joints, get_affine_transform
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +24,7 @@ logger = logging.getLogger(__name__)
 class JointsDataset(Dataset):
     def __init__(self, is_train, transform=None):
         # root, image_set
+        self.setup_config_constants()
         self.num_joints = 0
         self.pixel_std = 200
         self.flip_pairs = []
@@ -32,27 +32,7 @@ class JointsDataset(Dataset):
 
         self.is_train = is_train
 
-        # self.root = root
-        # self.image_set = image_set
-
-        # as one off, instead of loading from cfg, hot patch
-        # referencing cfg
-
-        # self.output_path = cfg.OUTPUT_DIR # not used
-        self.data_format = "sql"  # cfg.DATASET.DATA_FORMAT # not used
-
-        # self.scale_factor = cfg.DATASET.SCALE_FACTOR # TBD:should be handled by co-transform
-        # self.rotation_factor = cfg.DATASET.ROT_FACTOR # TBD:should be handled by co-transform
-        # self.flip = cfg.DATASET.FLIP
-
-        self.image_size = np.array((192, 256))  # (192,256) #cfg.MODEL.IMAGE_SIZE
-        self.target_type = "gaussian"  # cfg.MODEL.EXTRA.TARGET_TYPE
-        self.heatmap_size = np.array((24, 32))
-        self.sigma = 2  # 2#cfg.MODEL.EXTRA.SIGMA
-
-        self.scale_factor = 0.3
-        self.flip = self.is_train
-        self.rotation_factor = 40
+        self.flip = self.is_train  # enable joint flip as data augmentation for training
 
         self.transform = transform
         self.db = []
@@ -65,24 +45,32 @@ class JointsDataset(Dataset):
             # blur kernel size is not used for biased heatmap
         )
 
+    def setup_config_constants(self):
+        # image size
+        self.image_size = np.array((192, 256))
+        # heatmap configs
+        self.target_type = "gaussian"
+        self.heatmap_size = np.array((24, 32))
+        self.sigma = 2  # sigma for the gaussian distribution
+
+        # transformation config
+        self.scale_factor = 0.3
+        self.rotation_factor = 40
+
     def _get_db(self):
         raise NotImplementedError
 
     def evaluate(self, cfg, preds, output_dir, *args, **kwargs):
         raise NotImplementedError
 
-    def __len__(
-        self,
-    ):
+    def __len__(self):
         return len(self.db)
 
     def _get_sql_image_connections(self):
         raise NotImplementedError
 
     def _get_numpy_image(self, idx):
-        indexer = self._get_sql_image_connections()
-        data_numpy = indexer(self.annotations_df.iloc[idx])
-        return data_numpy
+        raise NotImplementedError
 
     def __getitem__(self, idx):
         db_rec = copy.deepcopy(self.db[idx])
@@ -120,11 +108,7 @@ class JointsDataset(Dataset):
                 )
                 flipped = True
 
-        trans = get_affine_transform(
-            center, scale, rotation, self.image_size
-        )  # disabled for co-transfomr
-        #!!!Doubtable for cv2.warpAffine in float!!!
-        # """
+        trans = get_affine_transform(center, scale, rotation, self.image_size)
         input = cv2.warpAffine(
             data_numpy,
             trans,
@@ -139,10 +123,10 @@ class JointsDataset(Dataset):
             if joints_vis[i, 0] > 0.0:
                 joints[i, 0:2] = affine_transform(joints[i, 0:2], trans)
 
-        target, target_weight = self.generate_target(joints, joints_vis)
+        heatmap, heatmap_weight = self.generate_heatmap(joints, joints_vis)
 
-        target = torch.from_numpy(target)
-        target_weight = torch.from_numpy(target_weight)
+        heatmap = torch.from_numpy(heatmap)
+        heatmap_weight = torch.from_numpy(heatmap_weight)
         meta = {
             "image": image_file,
             "filename": filename,
@@ -156,7 +140,7 @@ class JointsDataset(Dataset):
             "flipped": flipped,
         }
 
-        return input, target, target_weight, meta
+        return input, heatmap, heatmap_weight, meta
 
     def flip_joints(self, joints, joints_vis, data_numpy, c):
         data_numpy = data_numpy[:, ::-1]  # 3 channels image only
@@ -175,51 +159,15 @@ class JointsDataset(Dataset):
             if random.random() <= 0.6
             else 0
         )
-
         return s, r
 
-    def select_data(self, db):
-        db_selected = []
-        for rec in db:
-            num_vis = 0
-            joints_x = 0.0
-            joints_y = 0.0
-            for joint, joint_vis in zip(rec["joints_3d"], rec["joints_3d_vis"]):
-                if joint_vis[0] <= 0:
-                    continue
-                num_vis += 1
-
-                joints_x += joint[0]
-                joints_y += joint[1]
-            if num_vis == 0:
-                continue
-
-            joints_x, joints_y = joints_x / num_vis, joints_y / num_vis
-
-            area = rec["scale"][0] * rec["scale"][1] * (self.pixel_std**2)
-            joints_center = np.array([joints_x, joints_y])
-            bbox_center = np.array(rec["center"])
-            diff_norm2 = np.linalg.norm((joints_center - bbox_center), 2)
-            ks = np.exp(-1.0 * (diff_norm2**2) / ((0.2) ** 2 * 2.0 * area))
-
-            metric = (0.2 / 16) * num_vis + 0.45 - 0.2 / 16
-            if ks > metric:
-                db_selected.append(rec)
-
-        logger.info("=> num db: {}".format(len(db)))
-        logger.info("=> num selected db: {}".format(len(db_selected)))
-        return db_selected
-
-    def generate_target(self, joints, joints_vis):
+    def generate_heatmap(self, joints, joints_vis):
         # expand dims for heatmap generator to work
         joints = np.expand_dims(joints[:, :2], axis=0)
         joints_vis = np.expand_dims(joints_vis[:, 0], axis=0)
         heatmap_dict = self.heatmap_generator.encode(joints, joints_vis)
         heatmaps = heatmap_dict["heatmaps"]
         # add dummy z axis back
-        # heatmaps = np.expand_dims(heatmaps, axis=0)
-        # h, w, _ = heatmaps.shape
-        # heatmaps = np.concatenate([heatmaps, np.zeros((n, h, w, 1))], axis=3)
         heatmap_weights = heatmap_dict["keypoint_weights"]
         heatmap_weights = heatmap_weights.reshape((self.num_joints, 1))
 

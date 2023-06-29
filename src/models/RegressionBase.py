@@ -11,9 +11,7 @@ from .hyperparameters import l2, lr
 class RegressionModule(pl.LightningModule):
     def __init__(self):
         super().__init__()
-        self.conv = nn.Conv2d(
-            in_channels=1, out_channels=3, kernel_size=1, padding=1
-        ).cuda()
+        self.conv = nn.Conv2d(in_channels=1, out_channels=3, kernel_size=1, padding=1)
         self.net = None
         self.joint_loss = JointsMSELoss(use_target_weight=True)
         self.classification_loss = nn.CrossEntropyLoss()

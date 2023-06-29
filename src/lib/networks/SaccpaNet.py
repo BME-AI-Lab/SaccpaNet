@@ -74,39 +74,6 @@ class StemConv(nn.Module):
         return x, H, W
 
 
-class AttentionModule(nn.Module):
-    def __init__(self, dim):
-        super().__init__()
-        self.conv0 = nn.Conv2d(dim, dim, 5, padding=2, groups=dim)
-        self.conv0_1 = nn.Conv2d(dim, dim, (1, 7), padding=(0, 3), groups=dim)
-        self.conv0_2 = nn.Conv2d(dim, dim, (7, 1), padding=(3, 0), groups=dim)
-
-        self.conv1_1 = nn.Conv2d(dim, dim, (1, 11), padding=(0, 5), groups=dim)
-        self.conv1_2 = nn.Conv2d(dim, dim, (11, 1), padding=(5, 0), groups=dim)
-
-        self.conv2_1 = nn.Conv2d(dim, dim, (1, 21), padding=(0, 10), groups=dim)
-        self.conv2_2 = nn.Conv2d(dim, dim, (21, 1), padding=(10, 0), groups=dim)
-        # self.conv3 = nn.Conv2d(dim, dim, 1)
-
-    def forward(self, x):
-        u = x.clone()
-        attn = self.conv0(x)
-
-        attn_0 = self.conv0_1(attn)
-        attn_0 = self.conv0_2(attn_0)
-
-        attn_1 = self.conv1_1(attn)
-        attn_1 = self.conv1_2(attn_1)
-
-        attn_2 = self.conv2_1(attn)
-        attn_2 = self.conv2_2(attn_2)
-        attn = attn + attn_0 + attn_1 + attn_2
-
-        # attn = self.conv3(attn)
-
-        return attn * u
-
-
 class UAttentionLayer(nn.Module):
     def __init__(self, dim):
         super().__init__()
@@ -140,11 +107,6 @@ class UAttentionLayer(nn.Module):
         self.conv3_2 = nn.Conv2d(
             dim, dim, (3, 1), padding="same", dilation=7, groups=dim
         )
-        # self.conv3_3 = nn.Conv2d(dim, dim, (1, 1), padding="same", dilation=1, groups=dim)
-
-        # self.conv1x1 = nn.Conv2d(dim, dim, (1, 1), padding="same", groups=dim)
-        # self.down = nn.Conv2d(dim, dim, (1, 3), padding="same", groups=dim)
-        # self.conv3_2 = nn.Conv2d(dim, dim, (3, 1), padding="same", groups=dim)
 
     def forward(self, x):
         attn = x.clone()
@@ -315,7 +277,7 @@ class SACCPA(nn.Module):
 
         dpr = [
             x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))
-        ]  # stochastic depth decay rule
+        ]  # stochastic depth decay ruleb #TBD: should be removed
         cur = 0
 
         for i in range(num_stages):
@@ -323,9 +285,9 @@ class SACCPA(nn.Module):
                 patch_embed = StemConv(3, embed_dims[0])
             else:
                 patch_embed = OverlapPatchEmbed(
-                    patch_size=7 if i == 0 else 3,
-                    stride=4 if i == 0 else 2,
-                    in_chans=in_chans if i == 0 else embed_dims[i - 1],
+                    patch_size=3,
+                    stride=2,
+                    in_chans=embed_dims[i - 1],
                     embed_dim=embed_dims[i],
                 )
 
@@ -334,8 +296,8 @@ class SACCPA(nn.Module):
                     Block(
                         dim=embed_dims[i],
                         mlp_ratio=mlp_ratios[i],
-                        drop=drop_rate,
-                        drop_path=dpr[cur + j],
+                        drop=drop_rate,  # TBD: not used
+                        drop_path=dpr[cur + j],  # TBD: not used
                     )
                     for j in range(depths[i])
                 ]
@@ -346,6 +308,7 @@ class SACCPA(nn.Module):
             setattr(self, f"patch_embed{i + 1}", patch_embed)
             setattr(self, f"block{i + 1}", block)
             setattr(self, f"norm{i + 1}", norm)
+        self.init_weights()
 
     def init_weights(self):
         for m in self.modules():

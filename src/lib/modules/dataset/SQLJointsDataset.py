@@ -18,10 +18,14 @@ class SQLJointsDataset(JointsDataset):
     TABLE_NAME = "annotations"
     TEST_TABLE_NAME = "annotations"
 
-    def __init__(self, train, transform=None, mixed=True, all_quilt=False):
-        super().__init__(train, transform)
-        if train:
+    def __init__(
+        self, is_train, transform=None, mixed=True, all_quilt=False, validation=True
+    ):
+        super().__init__(is_train, transform)
+        if is_train:
             self.subset = "train"
+        elif validation:
+            self.subset = "validation"
         else:
             self.subset = "test"
         if all_quilt:
@@ -30,6 +34,7 @@ class SQLJointsDataset(JointsDataset):
         indexs = self._get_sql_indexs()
         self._initDB(self.subset, indexs)
         self.pixel_std = 200  # 200 ?? TBD
+        self.data_format = "sql"
         # image_widt
         self.image_width = self.image_size[0]  # cfg.MODEL.IMAGE_SIZE[0] # TBD
         self.image_height = self.image_size[1]  # cfg.MODEL.IMAGE_SIZE[1] #TBD
@@ -51,7 +56,7 @@ class SQLJointsDataset(JointsDataset):
         self.db_connection_string = self.DB_CONNECTION_STRING
         if subset == "train":
             self.table_name = self.TABLE_NAME
-        elif subset == "test":
+        elif subset == "test" or subset == "validation":
             self.table_name = self.TEST_TABLE_NAME
         self.pose = pd.read_sql_query(
             "SELECT "
@@ -63,13 +68,7 @@ class SQLJointsDataset(JointsDataset):
             f"SELECT * FROM {self.table_name} AS a WHERE a.subset='{subset}'",
             self.db_connection_string,
         )
-        # print(self.annotations_df.head(10))
-        # ???
-        # self.image_width = cfg.MODEL.IMAGE_SIZE[0]
-        # self.image_height = cfg.MODEL.IMAGE_SIZE[1]
-        # self.aspect_ratio = self.image_width * 1.0 / self.image_height
 
-    # @staticmethod
     def _get_sql_indexs(self):
         num_index = self.num_joints
         indexs = ["a.`index`"]
@@ -163,7 +162,7 @@ class SQLJointsDataset(JointsDataset):
         _vis = np.int32((xs != 0.0) & (ys != 0.0))
         joints_3d_vis = np.stack([_vis, _vis, zeros], axis=2)
 
-        # boudning box
+        # boudning box by joint location
         # warn x,y swapped due?
         xs_min = np.min(xs, axis=1)
         ys_min = np.min(ys, axis=1)
@@ -219,7 +218,7 @@ class SQLJointsDataset(JointsDataset):
 
 
 if __name__ == "__main__":
-    dataset = SQLJointsDataset(train=True)
+    dataset = SQLJointsDataset(is_train=True)
     db = dataset._get_db()
     ds_iter = iter(dataset)
     a, b, c, d = next(ds_iter)

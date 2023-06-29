@@ -11,7 +11,7 @@ def copy_and_write(representation, params):
 
 
 def search_range():
-    for W0 in [48, 64, 72, 80, 88, 96, 104, 112, 120]:
+    for W0 in [48, 64, 72, 80, 88, 96, 104, 112, 120]:  # range(72, 250, 16)
         new_params = deepcopy(params)  # prevent acidentally modifying
         new_params.update({"REGNET.W0": W0})
         representation = "_".join([f"{k}{v}" for k, v in new_params.items()])

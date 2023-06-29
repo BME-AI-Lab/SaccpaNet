@@ -9,7 +9,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 def create_kpt(KEYPOINT_MODELS, params):
     kpt_model = importlib.import_module(f"models.{KEYPOINT_MODELS}")
-    kpt_model = kpt_model.MyLightningModule(params, num_classes=18)
+    kpt_model = kpt_model.MyLightningModule(params, num_joints=18)
 
     return kpt_model
 
@@ -40,12 +40,8 @@ def load_cls_model(default_root_dir, model):
     return model, RESULT_DIR
 
 
-def create_cls_kpt(
-    KEYPOINT_MODELS,
-    CLASSIFICATION_MODELS,
-    ckpt_path,
-):
-    kpt_model = load_pretrained_kpt(KEYPOINT_MODELS, ckpt_path)
+def create_cls_kpt(KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path, params):
+    kpt_model = load_pretrained_kpt(KEYPOINT_MODELS, ckpt_path, params)
     model = create_cls(CLASSIFICATION_MODELS, kpt_model)
     return model
 
