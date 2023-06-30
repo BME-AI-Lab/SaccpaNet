@@ -54,8 +54,8 @@ class JointsDataset(Dataset):
         self.sigma = 2  # sigma for the gaussian distribution
 
         # transformation config
-        self.scale_factor = 0.3
-        self.rotation_factor = 40
+        self.scale_factor = 0.2
+        self.rotation_factor = 15  # TBD: double check if the unit is degree
 
     def _get_db(self):
         raise NotImplementedError

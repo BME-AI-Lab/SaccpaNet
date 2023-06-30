@@ -40,7 +40,7 @@ def test_saccpa_sample():
     default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
     epoch = 1
     trainer = pl.Trainer(
-        accelerator="cpu",
+        accelerator="gpu",
         max_epochs=epoch,
         min_epochs=epoch,
         default_root_dir=default_root_dir,
@@ -69,7 +69,7 @@ def test_classification_network():
     MODEL_NAME = f"{CLASSIFICATION_MODELS}+{KEYPOINT_MODELS}"
     epoch = 1
     trainer = pl.Trainer(
-        accelerator="cpu",
+        accelerator="gpu",
         max_epochs=epoch,
         min_epochs=epoch,
         default_root_dir=default_root_dir,

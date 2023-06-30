@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 
-from .inference import get_final_preds
+from .inference import get_max_preds  # need to be changed
 
 
 def calc_dists(preds, target, normalize):
@@ -46,8 +46,8 @@ def accuracy(output, target, hm_type="gaussian", thr=0.5):
     idx = list(range(output.shape[1]))
     norm = 1.0
     if hm_type == "gaussian":
-        pred, _ = get_final_preds(output)
-        target, _ = get_final_preds(target)
+        pred, _ = get_max_preds(output)
+        target, _ = get_max_preds(target)
         h = output.shape[2]
         w = output.shape[3]
         norm = np.ones((pred.shape[0], 2)) * np.array([h, w]) / 10

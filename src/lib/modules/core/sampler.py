@@ -117,6 +117,21 @@ def sample_parameters():
     return regnet_sampler()
 
 
+def check_complexity_constraints(param):
+    from lib.networks.SaccpaNet import SaccpaNet
+
+    model = SaccpaNet(params=param)  # construct the model
+    # Calculate the number of trainable parameters
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    min_params = 3.5e6
+    max_params = 4.5e7
+    result = params >= min_params and params <= max_params
+    if result:
+        print(params)
+    return result
+
+
 def sample_cfgs(seed, sample_size=32):
     """Samples chunk configs and return those that are unique and valid."""
     # Fix RNG seed (every call to this function should use a unique seed)
@@ -129,9 +144,10 @@ def sample_cfgs(seed, sample_size=32):
         params = sample_parameters()
         # Check if config is unique, if not continue
         key = params  # zip(params[0::2], params[1::2])
-        key = " ".join(["{} {}".format(k, v) for k, v in key.items()])
-        # if key in cfgs:
-        #    continue
+        # key = "_".join(["{}_{}".format(k, v) for k, v in key.items()])
+        key = "_".join(["{}".format(v) for k, v in key.items()])
+        if key in cfgs:
+            continue
         # Generate config from parameters
         # reset_cfg()
         # cfg.merge_from_other_cfg(setup_cfg.BASE_CFG)
@@ -147,22 +163,17 @@ def sample_cfgs(seed, sample_size=32):
         # For reference on scaling strategies, see: https://arxiv.org/abs/2103.06877.
         # Check if config is valid, if not continue
         # no way to calculate complexity, passed
-        # is_valid = samplers.check_complexity_constraints(setup_cfg.CONSTRAINTS)
-        # if not is_valid:
-        #    continue
+
+        is_valid = check_complexity_constraints(params)
+        if not is_valid:
+            continue
+
         # Set config description to key
         # cfg.DESC = key
         # Store copy of config if unique and valid
         cfgs[key] = params
         # Stop sampling if already reached quota
+        print(params)
         if len(cfgs) >= sample_size:
             break
     return cfgs
-
-
-if __name__ == "__main__":
-    for i in range(10):
-        sample = regnet_sampler()
-        print(sample)
-        results = generate_regnet_full(sample)
-        print(results)
