@@ -2,7 +2,7 @@
 from configs.manually_searched_params import params as sample_params
 from lib.modules.core.sampler import generate_regnet_full
 
-ws, ds, ss, bs, gs = generate_regnet_full(sample_params)
+ws, ds = generate_regnet_full(sample_params)
 norm_cfg = dict(type="BN", requires_grad=True)
 ham_norm_cfg = dict(type="GN", num_groups=32, requires_grad=True)
 
@@ -41,7 +41,7 @@ auto_scale_lr = dict(base_batch_size=512)
 default_hooks = dict(checkpoint=dict(save_best="coco-wholebody/AP", rule="greater"))
 
 # codec settings
-codec = dict(type="MSRAHeatmap", input_size=(192, 256), heatmap_size=(48, 64), sigma=2)
+codec = dict(type="MSRAHeatmap", input_size=(192, 256), heatmap_size=(24, 32), sigma=2)
 
 # model settings
 model = dict(

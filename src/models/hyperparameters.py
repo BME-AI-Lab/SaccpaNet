@@ -1,2 +1,1 @@
-lr = 5e-5  # 1e-4#0.02#0.00002c
-l2 = 0  # 5e-8
+from configs.hyperparameters import *

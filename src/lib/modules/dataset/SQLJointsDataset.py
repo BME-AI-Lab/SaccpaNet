@@ -12,24 +12,23 @@ from random import random, randrange, seed
 seed(42)
 import functools
 
+from configs.dataset_config import DB_CONNECTION_STRING
+
 
 class SQLJointsDataset(JointsDataset):
-    DB_CONNECTION_STRING = "sqlite:///..\\dataset.db"
+    DB_CONNECTION_STRING = DB_CONNECTION_STRING
     TABLE_NAME = "annotations"
-    TEST_TABLE_NAME = "annotations"
 
     def __init__(
-        self, is_train, transform=None, mixed=True, all_quilt=False, validation=True
+        self, is_train, transform=None, mixed=True, all_quilt=False, test=True
     ):
         super().__init__(is_train, transform)
         if is_train:
             self.subset = "train"
-        elif validation:
-            self.subset = "validation"
-        else:
+        elif test:
             self.subset = "test"
-        if all_quilt:
-            self.TEST_TABLE_NAME = self.TABLE_NAME
+        else:
+            self.subset = "val"
         self.num_joints = 18
         indexs = self._get_sql_indexs()
         self._initDB(self.subset, indexs)
@@ -54,10 +53,7 @@ class SQLJointsDataset(JointsDataset):
 
     def _initDB(self, subset, indexs):
         self.db_connection_string = self.DB_CONNECTION_STRING
-        if subset == "train":
-            self.table_name = self.TABLE_NAME
-        elif subset == "test" or subset == "validation":
-            self.table_name = self.TEST_TABLE_NAME
+        self.table_name = self.TABLE_NAME
         self.pose = pd.read_sql_query(
             "SELECT "
             + indexs
@@ -218,6 +214,7 @@ class SQLJointsDataset(JointsDataset):
 
 
 if __name__ == "__main__":
+    """Test the dataset"""
     dataset = SQLJointsDataset(is_train=True)
     db = dataset._get_db()
     ds_iter = iter(dataset)

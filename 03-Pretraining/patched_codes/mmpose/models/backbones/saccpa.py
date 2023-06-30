@@ -4,9 +4,12 @@ import warnings
 import torch
 import torch.functional as F
 import torch.nn as nn
+from mmengine.model import BaseModule, constant_init, normal_init, trunc_normal_init
 from torch.nn.modules.utils import _pair as to_2tuple
 
 from lib.modules.core.sampler import generate_regnet_full
+
+from .base_backbone import BaseBackbone
 
 
 class Mlp(BaseModule):
@@ -651,7 +654,7 @@ class LightHamHead(nn.Module):
 class SegNext(nn.Module):
     def __init__(self, num_classes=18):
         super().__init__()
-        self.backbone = MSCAN(
+        self.backbone = SACCPA(
             in_chans=3,
             embed_dims=[64, 128, 320, 512],
             depths=[2, 2, 4, 2],
@@ -689,7 +692,7 @@ class SaccpaNet(nn.Module):
         super().__init__()
         assert len(params) > 0  # check if params is empty
         self.params = params
-        ws, ds, _, _, _ = generate_regnet_full(params)
+        ws, ds = generate_regnet_full(params)
         self.ws, self.ds = ws, ds
         self.head_input = sum(ws[1:4])
         self.backbone = SACCPA(

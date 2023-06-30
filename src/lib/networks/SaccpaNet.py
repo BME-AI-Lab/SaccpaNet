@@ -215,6 +215,16 @@ class Block(nn.Module):
         )
 
     def forward(self, x, H, W):
+        """forward _summary_
+
+        Args:
+            x (Tensor): Shape (B, H*W, C)
+            H (Tensor): Height H
+            W (Tensor): Width W
+
+        Returns:
+            Tensor: Shape (B, H*W, C)
+        """
         B, N, C = x.shape
         x = x.permute(0, 2, 1).view(B, C, H, W)
         x = x + self.drop_path(
@@ -250,6 +260,13 @@ class OverlapPatchEmbed(nn.Module):
         self.norm = nn.BatchNorm2d(embed_dim)
 
     def forward(self, x):
+        """Forward function.
+
+        Args:
+            x (Tensor): Input tensor of shape (B, C, H, W)
+        Returns:
+            Tensor: output of shape (B, H*W, C), and H and W are reduced by patch_size and stride
+        """
         x = self.proj(x)
         _, _, H, W = x.shape
         x = self.norm(x)
@@ -322,6 +339,13 @@ class SACCPA(nn.Module):
                 normal_init(m, mean=0, std=math.sqrt(2.0 / fan_out), bias=0)
 
     def forward(self, x):
+        """Forward function.
+
+        Args:
+            x (Tensor): Input tensor of shape (B, C, H, W)
+        Returns:
+            Tensor: Output List of tensor, with shape of (B, C, H/i, W/i) for i in [4, 8, 16, 32]
+        """
         B = x.shape[0]
         outs = []
 
@@ -340,11 +364,20 @@ class SACCPA(nn.Module):
 
 
 class DWConv(nn.Module):
+    """Depthwise Convolution"""
+
     def __init__(self, dim=768):
         super(DWConv, self).__init__()
         self.dwconv = nn.Conv2d(dim, dim, 3, 1, 1, bias=True, groups=dim)
 
     def forward(self, x):
+        """Forward function.
+        Args:
+            x (Tensor): Shape (B, C_dim, H, W)
+
+        Returns:
+            Tensor: Shape(B, C_dim, H, W)
+        """
         x = self.dwconv(x)
         return x
 
@@ -405,6 +438,14 @@ class _MatrixDecomposition2DBase(nn.Module):
         raise NotImplementedError
 
     def forward(self, x, return_bases=False):
+        """Matrix Decomposition forward function.
+
+        Args:
+            x (Tensor): input tensor of shape (B, C, H, W)
+
+        Returns:
+            Tensor: shape of (B, C, H, W)
+        """
         B, C, H, W = x.shape
 
         # (B, C, H, W) -> (B * S, D, N)
@@ -511,6 +552,14 @@ class Hamburger(nn.Module):
         )
 
     def forward(self, x):
+        """Hamburger network forward function.
+
+        Args:
+            x (Tensor): input tensor of shape (N, C_ham_channels, H, W)
+
+        Returns:
+            Tensor: shape of (N, C_ham_channels, H, W)
+        """
         enjoy = self.ham_in(x)
         enjoy = F.relu(enjoy, inplace=True)
         enjoy = self.ham(enjoy)
@@ -575,7 +624,13 @@ class LightHamHead(nn.Module):
 
     # patch
     def cls_seg(self, feat):
-        """Classify each pixel."""
+        """Classify each pixel.
+
+        Args:
+            feat (Tensor): The input feature map of shape (N, C, H, W).
+        Returns:
+            Tensor: The predicted segmentation map of shape (N, num_classes, H, W).
+        """
         if self.dropout is not None:
             feat = self.dropout(feat)
         output = self.conv_seg(feat)
@@ -586,7 +641,13 @@ class LightHamHead(nn.Module):
         return inputs
 
     def forward(self, inputs):
-        """Forward function."""
+        """Forward function.
+
+        Args:
+            inputs (list[Tensor]): List of multi-level img features of shape (N, Ci, Hi, Wi) for each level i.
+        Returns:
+            Tensor: The predicted segmentation map of shape (N, num_classes, H, W)
+        """
         inputs = self._transform_inputs(inputs)
         size = inputs[0].shape[2:]
 
@@ -622,7 +683,7 @@ class SaccpaNet(nn.Module):
         super().__init__()
         assert len(params) > 0  # check if params is empty
         self.params = params
-        ws, ds, _, _, _ = generate_regnet_full(params)
+        ws, ds = generate_regnet_full(params)
         self.ws, self.ds = ws, ds
         self.head_input = sum(ws[1:4])
         self.backbone = SACCPA(

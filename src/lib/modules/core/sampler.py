@@ -1,16 +1,8 @@
 # import rand
 import numpy as np
 
+from configs.sample_range import DEPTH, MAX_PARAMS, MIN_PARAMS, NUM_STAGES, W0, WA, WM
 from lib.modules.core import rand
-from lib.modules.core.sample_range import (
-    BOT_MUL,
-    DEPTH,
-    GROUP_W,
-    NUM_STAGES,
-    W0,
-    WA,
-    WM,
-)
 
 
 def regnet_sampler():
@@ -28,15 +20,8 @@ def regnet_sampler():
         *WM,
         0.001,
     )
-    gw = rand.power2_or_log_uniform(
-        *GROUP_W,
-        8,
-    )
-    bm = rand.power2_uniform(
-        *BOT_MUL,
-        1 / 128,
-    )
-    params = ["DEPTH", d, "W0", w0, "WA", wa, "WM", wm, "GROUP_W", gw, "BOT_MUL", bm]
+
+    params = ["DEPTH", d, "W0", w0, "WA", wa, "WM", wm]
     params = ["REGNET." + p if i % 2 == 0 else p for i, p in enumerate(params)]
     return dict(zip(params[::2], params[1::2]))
 
@@ -58,22 +43,11 @@ def check_regnet_constraints(param):
     return True
 
 
-def adjust_block_compatibility(ws, bs, gs):
-    """Adjusts the compatibility of widths, bottlenecks, and groups."""
-    assert len(ws) == len(bs) == len(gs)
-    assert all(w > 0 and b > 0 and g > 0 for w, b, g in zip(ws, bs, gs))
-    assert all(b < 1 or b % 1 == 0 for b in bs)
-    vs = [int(max(1, w * b)) for w, b in zip(ws, bs)]
-    gs = [int(min(g, v)) for g, v in zip(gs, vs)]
-    ms = [np.lcm(g, int(b)) if b > 1 else g for g, b in zip(gs, bs)]
-    vs = [max(m, int(round(v / m) * m)) for v, m in zip(vs, ms)]
-    ws = [int(v / b) for v, b in zip(vs, bs)]
-    assert all(w * b % g == 0 for w, b, g in zip(ws, bs, gs))
-    return ws, bs, gs
-
-
 def generate_regnet(w_a, w_0, w_m, d, q=8):
-    """Generates per stage widths and depths from RegNet parameters."""
+    """Generates per stage widths and depths from RegNet parameters.
+    It follows the equation in section 3.3 of  "Designing Network Design Spaces"
+
+    """
     assert w_a >= 0 and w_0 > 0 and w_m > 1 and w_0 % q == 0
     # Generate continuous per-block ws
     ws_cont = np.arange(d) * w_a + w_0
@@ -102,11 +76,7 @@ def generate_regnet_full(params):
         params["REGNET.DEPTH"],
     )
     ws, ds = generate_regnet(w_a, w_0, w_m, d)[0:2]
-    ss = [2 for _ in ws]
-    bs = [params["REGNET.BOT_MUL"] for _ in ws]
-    gs = [params["REGNET.GROUP_W"] for _ in ws]
-    ws, bs, gs = adjust_block_compatibility(ws, bs, gs)
-    return ws, ds, ss, bs, gs
+    return ws, ds
 
 
 " ws = widths , ds = depths, ss = stride, bs = bottlenet multipliers, gs = group w"
@@ -124,9 +94,7 @@ def check_complexity_constraints(param):
     # Calculate the number of trainable parameters
     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
     params = sum([np.prod(p.size()) for p in model_parameters])
-    min_params = 3.5e6
-    max_params = 4.5e7
-    result = params >= min_params and params <= max_params
+    result = params >= MIN_PARAMS and params <= MAX_PARAMS
     if result:
         print(params)
     return result

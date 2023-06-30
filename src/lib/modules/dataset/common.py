@@ -8,12 +8,13 @@ from sqlalchemy.pool import StaticPool
 
 _lock = Lock()
 engine = None
+from configs.dataset_config import DB_CONNECTION_STRING
 
 
 class SQL_indexer:
     def __init__(self, query_string, connection):
         global engine
-        _lock.acquire()
+        _lock.acquire()  # prevent multiple threads from creating multiple engines
         if engine is None:
             engine = sqlalchemy.create_engine(
                 connection, echo=False, poolclass=StaticPool
@@ -24,21 +25,17 @@ class SQL_indexer:
 
     # @lru_cache(maxsize=200000)
     def __getitem__(self, key):
-        # _lock.acquire()
         while True:
             try:
                 self.conn = self.engine.connect()
-                # print(self.query_string.format(key))
                 result = self.conn.execute(self.query_string.format(key))
                 break
             except sqlalchemy.exc.OperationalError:
                 continue
-        # break
-        # assert result.rowcount == 1
+        # assert result.rowcount == 1 # SQLite backend do not provide rowcount
         initial_row = result.first()
         assert len(initial_row.keys()) == 1
-        # _lock.release()
-        return initial_row[0]  # result[0][0]
+        return initial_row[0]
 
 
 def fill_hole(img):
@@ -51,7 +48,7 @@ class ResolveImage:
     def __init__(
         self,
         query_string="SELECT a.depth_array FROM depth_images as a WHERE a.`index`={}",
-        connection="sqlite:///..\\dataset.db",
+        connection=DB_CONNECTION_STRING,
         resize=(224, 224),
     ):
         self.image_index = SQL_indexer(query_string, connection)
