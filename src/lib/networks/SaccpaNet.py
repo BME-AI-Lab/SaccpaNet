@@ -299,7 +299,7 @@ class SACCPA(nn.Module):
 
         for i in range(num_stages):
             if i == 0:
-                patch_embed = StemConv(3, embed_dims[0])
+                patch_embed = StemConv(in_chans, embed_dims[0])
             else:
                 patch_embed = OverlapPatchEmbed(
                     patch_size=3,

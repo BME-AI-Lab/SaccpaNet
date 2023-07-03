@@ -105,14 +105,6 @@ class RegressionModule(pl.LightningModule):
             logger=True,
         )
         self.log(
-            "val_acc",
-            class_acc,
-            on_step=False,
-            on_epoch=True,
-            prog_bar=True,
-            logger=True,
-        )
-        self.log(
             "val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True
         )
         return {"val_loss": loss, "val_joint_acc": acc}
