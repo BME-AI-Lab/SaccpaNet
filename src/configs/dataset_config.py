@@ -8,7 +8,7 @@ DB_CONNECTION_STRING = f"sqlite:///{SQLITE_DB_PATH}"
 
 # IMAGE SETUP
 IMAGE_SIZE = np.array((192, 256))
-HEATMAP_SIZE = np.array((24, 32))
+HEATMAP_SIZE = np.array((48, 64))
 TARGET_TYPE = "gaussian"
 SIGMA = 2
 
