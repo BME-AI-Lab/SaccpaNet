@@ -16,7 +16,6 @@ class Mlp(nn.Module):
         hidden_features=None,
         out_features=None,
         act_layer=nn.GELU,
-        drop=0.0,
     ):
         super().__init__()
         out_features = out_features or in_features
@@ -25,17 +24,13 @@ class Mlp(nn.Module):
         self.dwconv = DWConv(hidden_features)
         self.act = act_layer()
         self.fc2 = nn.Conv2d(hidden_features, out_features, 1)
-        self.drop = nn.Dropout(drop)
 
     def forward(self, x):
         x = self.fc1(x)
 
         x = self.dwconv(x)
         x = self.act(x)
-        x = self.drop(x)
         x = self.fc2(x)
-        x = self.drop(x)
-
         return x
 
 
@@ -125,10 +120,6 @@ class UAttentionLayer(nn.Module):
         attn_3 = self.conv3_1(attn)
         attn_3 = self.conv3_2(attn_3)
         attn = attn + attn_3
-
-        # attn = self.conv1x1(attn)
-
-        # attn = attn + attn_0 + attn_1 + attn_2
         return attn
 
 
@@ -154,7 +145,6 @@ class UAttention(nn.Module):
         x = self.down2_1(attn_1.clone())
 
         attn_2 = self.down3_0(x)
-        # attn_2 = self.down3_1(attn_2)
         attn_1 = nn.functional.interpolate(attn_1.clone(), u.shape[2:], mode="bilinear")
         attn_2 = nn.functional.interpolate(attn_2.clone(), u.shape[2:], mode="bilinear")
         attn = torch.concat([attn_0, attn_1, attn_2], axis=1)
@@ -188,23 +178,18 @@ class Block(nn.Module):
         self,
         dim,
         mlp_ratio=4.0,
-        drop=0.0,
-        drop_path=0.0,
         act_layer=nn.GELU,
     ):
         super().__init__()
         self.norm1 = nn.BatchNorm2d(dim)
         self.attn = SpatialAttention(dim)
-        self.drop_path = nn.Identity()  # DropPath(
-        #    drop_path) if drop_path > 0. else nn.Identity()
-        # patch DropPath
+
         self.norm2 = nn.BatchNorm2d(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(
             in_features=dim,
             hidden_features=mlp_hidden_dim,
             act_layer=act_layer,
-            drop=drop,
         )
         layer_scale_init_value = 1e-2
         self.layer_scale_1 = nn.Parameter(
@@ -227,12 +212,10 @@ class Block(nn.Module):
         """
         B, N, C = x.shape
         x = x.permute(0, 2, 1).view(B, C, H, W)
-        x = x + self.drop_path(
-            self.layer_scale_1.unsqueeze(-1).unsqueeze(-1) * self.attn(self.norm1(x))
+        x = x + self.layer_scale_1.unsqueeze(-1).unsqueeze(-1) * self.attn(
+            self.norm1(x)
         )
-        x = x + self.drop_path(
-            self.layer_scale_2.unsqueeze(-1).unsqueeze(-1) * self.mlp(self.norm2(x))
-        )
+        x = x + self.layer_scale_2.unsqueeze(-1).unsqueeze(-1) * self.mlp(self.norm2(x))
         x = x.view(B, C, N).permute(0, 2, 1)
         return x
 
@@ -283,8 +266,6 @@ class SACCPA(nn.Module):
         in_chans=3,
         embed_dims=[64, 128, 256, 512],
         mlp_ratios=[8, 8, 4, 4],
-        drop_rate=0.0,
-        drop_path_rate=0.0,
         depths=[3, 4, 6, 3],
         num_stages=4,
     ):
@@ -292,9 +273,6 @@ class SACCPA(nn.Module):
         self.depths = depths
         self.num_stages = num_stages
 
-        dpr = [
-            x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))
-        ]  # stochastic depth decay ruleb #TBD: should be removed
         cur = 0
 
         for i in range(num_stages):
@@ -313,8 +291,6 @@ class SACCPA(nn.Module):
                     Block(
                         dim=embed_dims[i],
                         mlp_ratio=mlp_ratios[i],
-                        drop=drop_rate,  # TBD: not used
-                        drop_path=dpr[cur + j],  # TBD: not used
                     )
                     for j in range(depths[i])
                 ]
@@ -691,8 +667,6 @@ class SaccpaNet(nn.Module):
             embed_dims=ws,  # [64, 128, 320, 512],
             depths=ds,  # [2, 2, 4, 2],
             mlp_ratios=[8, 8, 4, 4],  # mlp ratio need
-            drop_rate=0.0,
-            drop_path_rate=0.1,
         )
         head_in_index = [0, 1, 2, 3]
         in_channels = [ws[i] for i in head_in_index]

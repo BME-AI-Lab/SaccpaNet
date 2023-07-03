@@ -77,43 +77,9 @@ class StemConv(BaseModule):
         return x, H, W
 
 
-class AttentionModule(BaseModule):
-    def __init__(self, dim):
-        super().__init__()
-        self.conv0 = nn.Conv2d(dim, dim, 5, padding=2, groups=dim)
-        self.conv0_1 = nn.Conv2d(dim, dim, (1, 7), padding=(0, 3), groups=dim)
-        self.conv0_2 = nn.Conv2d(dim, dim, (7, 1), padding=(3, 0), groups=dim)
-
-        self.conv1_1 = nn.Conv2d(dim, dim, (1, 11), padding=(0, 5), groups=dim)
-        self.conv1_2 = nn.Conv2d(dim, dim, (11, 1), padding=(5, 0), groups=dim)
-
-        self.conv2_1 = nn.Conv2d(dim, dim, (1, 21), padding=(0, 10), groups=dim)
-        self.conv2_2 = nn.Conv2d(dim, dim, (21, 1), padding=(10, 0), groups=dim)
-        # self.conv3 = nn.Conv2d(dim, dim, 1)
-
-    def forward(self, x):
-        u = x.clone()
-        attn = self.conv0(x)
-
-        attn_0 = self.conv0_1(attn)
-        attn_0 = self.conv0_2(attn_0)
-
-        attn_1 = self.conv1_1(attn)
-        attn_1 = self.conv1_2(attn_1)
-
-        attn_2 = self.conv2_1(attn)
-        attn_2 = self.conv2_2(attn_2)
-        attn = attn + attn_0 + attn_1 + attn_2
-
-        # attn = self.conv3(attn)
-
-        return attn * u
-
-
 class UAttentionLayer(BaseModule):
     def __init__(self, dim):
         super().__init__()
-        # remark: initial search without 1x1
         self.conv0_1 = nn.Conv2d(
             dim, dim, (1, 3), padding="same", dilation=1, groups=dim
         )
@@ -144,11 +110,6 @@ class UAttentionLayer(BaseModule):
         self.conv3_2 = nn.Conv2d(
             dim, dim, (3, 1), padding="same", dilation=7, groups=dim
         )
-        # self.conv3_3 = nn.Conv2d(dim, dim, (1, 1), padding="same", dilation=1, groups=dim)
-
-        # self.conv1x1 = nn.Conv2d(dim, dim, (1, 1), padding="same", groups=dim)
-        # self.down = nn.Conv2d(dim, dim, (1, 3), padding="same", groups=dim)
-        # self.conv3_2 = nn.Conv2d(dim, dim, (3, 1), padding="same", groups=dim)
 
     def forward(self, x):
         attn = x.clone()
@@ -167,10 +128,6 @@ class UAttentionLayer(BaseModule):
         attn_3 = self.conv3_1(attn)
         attn_3 = self.conv3_2(attn_3)
         attn = attn + attn_3
-
-        # attn = self.conv1x1(attn)
-
-        # attn = attn + attn_0 + attn_1 + attn_2
         return attn
 
 
@@ -230,23 +187,18 @@ class Block(BaseModule):
         self,
         dim,
         mlp_ratio=4.0,
-        drop=0.0,
-        drop_path=0.0,
         act_layer=nn.GELU,
     ):
         super().__init__()
         self.norm1 = nn.BatchNorm2d(dim)
         self.attn = SpatialAttention(dim)
-        self.drop_path = nn.Identity()  # DropPath(
-        #    drop_path) if drop_path > 0. else nn.Identity()
-        # patch DropPath
+
         self.norm2 = nn.BatchNorm2d(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(
             in_features=dim,
             hidden_features=mlp_hidden_dim,
             act_layer=act_layer,
-            drop=drop,
         )
         layer_scale_init_value = 1e-2
         self.layer_scale_1 = nn.Parameter(
@@ -257,14 +209,22 @@ class Block(BaseModule):
         )
 
     def forward(self, x, H, W):
+        """forward _summary_
+
+        Args:
+            x (Tensor): Shape (B, H*W, C)
+            H (Tensor): Height H
+            W (Tensor): Width W
+
+        Returns:
+            Tensor: Shape (B, H*W, C)
+        """
         B, N, C = x.shape
         x = x.permute(0, 2, 1).view(B, C, H, W)
-        x = x + self.drop_path(
-            self.layer_scale_1.unsqueeze(-1).unsqueeze(-1) * self.attn(self.norm1(x))
+        x = x + self.layer_scale_1.unsqueeze(-1).unsqueeze(-1) * self.attn(
+            self.norm1(x)
         )
-        x = x + self.drop_path(
-            self.layer_scale_2.unsqueeze(-1).unsqueeze(-1) * self.mlp(self.norm2(x))
-        )
+        x = x + self.layer_scale_2.unsqueeze(-1).unsqueeze(-1) * self.mlp(self.norm2(x))
         x = x.view(B, C, N).permute(0, 2, 1)
         return x
 
@@ -292,6 +252,13 @@ class OverlapPatchEmbed(BaseModule):
         self.norm = nn.BatchNorm2d(embed_dim)
 
     def forward(self, x):
+        """Forward function.
+
+        Args:
+            x (Tensor): Input tensor of shape (B, C, H, W)
+        Returns:
+            Tensor: output of shape (B, H*W, C), and H and W are reduced by patch_size and stride
+        """
         x = self.proj(x)
         _, _, H, W = x.shape
         x = self.norm(x)
@@ -308,8 +275,6 @@ class SACCPA(BaseBackbone):
         in_chans=3,
         embed_dims=[64, 128, 256, 512],
         mlp_ratios=[8, 8, 4, 4],
-        drop_rate=0.0,
-        drop_path_rate=0.0,
         depths=[3, 4, 6, 3],
         num_stages=4,
     ):
@@ -317,19 +282,16 @@ class SACCPA(BaseBackbone):
         self.depths = depths
         self.num_stages = num_stages
 
-        dpr = [
-            x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))
-        ]  # stochastic depth decay rule
         cur = 0
 
         for i in range(num_stages):
             if i == 0:
-                patch_embed = StemConv(3, embed_dims[0])
+                patch_embed = StemConv(in_chans, embed_dims[0])
             else:
                 patch_embed = OverlapPatchEmbed(
-                    patch_size=7 if i == 0 else 3,
-                    stride=4 if i == 0 else 2,
-                    in_chans=in_chans if i == 0 else embed_dims[i - 1],
+                    patch_size=3,
+                    stride=2,
+                    in_chans=embed_dims[i - 1],
                     embed_dim=embed_dims[i],
                 )
 
@@ -338,8 +300,6 @@ class SACCPA(BaseBackbone):
                     Block(
                         dim=embed_dims[i],
                         mlp_ratio=mlp_ratios[i],
-                        drop=drop_rate,
-                        drop_path=dpr[cur + j],
                     )
                     for j in range(depths[i])
                 ]
@@ -363,6 +323,13 @@ class SACCPA(BaseBackbone):
                 normal_init(m, mean=0, std=math.sqrt(2.0 / fan_out), bias=0)
 
     def forward(self, x):
+        """Forward function.
+
+        Args:
+            x (Tensor): Input tensor of shape (B, C, H, W)
+        Returns:
+            Tensor: Output List of tensor, with shape of (B, C, H/i, W/i) for i in [4, 8, 16, 32]
+        """
         B = x.shape[0]
         outs = []
 
@@ -381,11 +348,20 @@ class SACCPA(BaseBackbone):
 
 
 class DWConv(nn.Module):
+    """Depthwise Convolution"""
+
     def __init__(self, dim=768):
         super(DWConv, self).__init__()
         self.dwconv = nn.Conv2d(dim, dim, 3, 1, 1, bias=True, groups=dim)
 
     def forward(self, x):
+        """Forward function.
+        Args:
+            x (Tensor): Shape (B, C_dim, H, W)
+
+        Returns:
+            Tensor: Shape(B, C_dim, H, W)
+        """
         x = self.dwconv(x)
         return x
 
@@ -414,15 +390,15 @@ class _MatrixDecomposition2DBase(nn.Module):
 
         self.rand_init = args.setdefault("RAND_INIT", True)
 
-        print("spatial", self.spatial)
-        print("S", self.S)
-        print("D", self.D)
-        print("R", self.R)
-        print("train_steps", self.train_steps)
-        print("eval_steps", self.eval_steps)
-        print("inv_t", self.inv_t)
-        print("eta", self.eta)
-        print("rand_init", self.rand_init)
+        # print("spatial", self.spatial)
+        # print("S", self.S)
+        # print("D", self.D)
+        # print("R", self.R)
+        # print("train_steps", self.train_steps)
+        # print("eval_steps", self.eval_steps)
+        # print("inv_t", self.inv_t)
+        # print("eta", self.eta)
+        # print("rand_init", self.rand_init)
 
     def _build_bases(self, B, S, D, R, cuda=False):
         raise NotImplementedError
@@ -446,6 +422,14 @@ class _MatrixDecomposition2DBase(nn.Module):
         raise NotImplementedError
 
     def forward(self, x, return_bases=False):
+        """Matrix Decomposition.
+
+        Args:
+            x (Tensor): input tensor of shape (B, C, H, W)
+
+        Returns:
+            Tensor: shape of (B, C, H, W)
+        """
         B, C, H, W = x.shape
 
         # (B, C, H, W) -> (B * S, D, N)
@@ -552,6 +536,14 @@ class Hamburger(nn.Module):
         )
 
     def forward(self, x):
+        """Hamburger network forward function.
+
+        Args:
+            x (Tensor): input tensor of shape (N, C_ham_channels, H, W)
+
+        Returns:
+            Tensor: shape of (N, C_ham_channels, H, W)
+        """
         enjoy = self.ham_in(x)
         enjoy = F.relu(enjoy, inplace=True)
         enjoy = self.ham(enjoy)
@@ -616,7 +608,13 @@ class LightHamHead(nn.Module):
 
     # patch
     def cls_seg(self, feat):
-        """Classify each pixel."""
+        """Classify each pixel.
+
+        Args:
+            feat (Tensor): The input feature map of shape (N, C, H, W).
+        Returns:
+            Tensor: The predicted segmentation map of shape (N, num_classes, H, W).
+        """
         if self.dropout is not None:
             feat = self.dropout(feat)
         output = self.conv_seg(feat)
@@ -627,7 +625,13 @@ class LightHamHead(nn.Module):
         return inputs
 
     def forward(self, inputs):
-        """Forward function."""
+        """Forward function.
+
+        Args:
+            inputs (list[Tensor]): List of multi-level img features of shape (N, Ci, Hi, Wi) for each level i.
+        Returns:
+            Tensor: The predicted segmentation map of shape (N, num_classes, H, W)
+        """
         inputs = self._transform_inputs(inputs)
         size = inputs[0].shape[2:]
 
@@ -651,35 +655,6 @@ class LightHamHead(nn.Module):
         return output
 
 
-class SegNext(nn.Module):
-    def __init__(self, num_classes=18):
-        super().__init__()
-        self.backbone = SACCPA(
-            in_chans=3,
-            embed_dims=[64, 128, 320, 512],
-            depths=[2, 2, 4, 2],
-        )
-        self.head = LightHamHead(
-            in_channels=[128, 320, 512],
-            in_index=[1, 2, 3],
-            channels=256,
-            ham_channels=256,
-            dropout_ratio=0.1,
-            num_classes=18,
-        )
-        # self.in_index = [1,2,3]
-
-    def forward(self, input):
-        x = input
-        x = self.backbone(x)
-        # x = x[self.in_index]
-        x = self.head(x)
-        # x= resize()
-        x = F.tanh(x)  # doubt
-        x = resize(x, (256, 192))  # doubt
-        return x
-
-
 class SaccpaNet(nn.Module):
     def __init__(self, params={}, num_joints=18):
         """SCAPPA based regression Network.
@@ -696,14 +671,12 @@ class SaccpaNet(nn.Module):
         self.ws, self.ds = ws, ds
         self.head_input = sum(ws[1:4])
         self.backbone = SACCPA(
-            in_chans=3,  # in_chans is fixed at 3 to maintain compatibility with coco pretraining
+            in_chans=1,  # in_chans is fixed at 3 to maintain compatibility with coco pretraining
             embed_dims=ws,  # [64, 128, 320, 512],
             depths=ds,  # [2, 2, 4, 2],
             mlp_ratios=[8, 8, 4, 4],  # mlp ratio need
-            drop_rate=0.0,
-            drop_path_rate=0.1,
         )
-        head_in_index = [1, 2, 3]
+        head_in_index = [0, 1, 2, 3]
         in_channels = [ws[i] for i in head_in_index]
 
         channels = 1024
@@ -717,6 +690,7 @@ class SaccpaNet(nn.Module):
             dropout_ratio=ham_dropout_ratio,
             num_classes=num_joints,
         )
+        self.init_conv = nn.Conv2d(3, 1, 1)
         # self.in_index = [1,2,3]
 
     def forward(self, input):
@@ -729,6 +703,7 @@ class SaccpaNet(nn.Module):
             Tensor: (N,C,H/8, W/8)
         """
         x = input
+        x = self.init_conv(x)
         x = self.backbone(x)
         x = self.head(x)
         x = F.sigmoid(x)
