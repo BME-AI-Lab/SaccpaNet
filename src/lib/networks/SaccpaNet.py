@@ -687,14 +687,14 @@ class SaccpaNet(nn.Module):
         self.ws, self.ds = ws, ds
         self.head_input = sum(ws[1:4])
         self.backbone = SACCPA(
-            in_chans=3,  # in_chans is fixed at 3 to maintain compatibility with coco pretraining
+            in_chans=1,  # in_chans is fixed at 3 to maintain compatibility with coco pretraining
             embed_dims=ws,  # [64, 128, 320, 512],
             depths=ds,  # [2, 2, 4, 2],
             mlp_ratios=[8, 8, 4, 4],  # mlp ratio need
             drop_rate=0.0,
             drop_path_rate=0.1,
         )
-        head_in_index = [1, 2, 3]
+        head_in_index = [0, 1, 2, 3]
         in_channels = [ws[i] for i in head_in_index]
 
         channels = 1024
