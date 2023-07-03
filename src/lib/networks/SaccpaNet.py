@@ -438,7 +438,7 @@ class _MatrixDecomposition2DBase(nn.Module):
         raise NotImplementedError
 
     def forward(self, x, return_bases=False):
-        """Matrix Decomposition forward function.
+        """Matrix Decomposition.
 
         Args:
             x (Tensor): input tensor of shape (B, C, H, W)

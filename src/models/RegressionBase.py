@@ -89,10 +89,10 @@ class RegressionModule(pl.LightningModule):
         regress = result["regress"]
         regression_loss = self.joint_loss(regress, target, target_weight) * 1000
         loss = regression_loss
-        _, joint_acc, cnt, pred = accuracy(
+        _, avg_acc, cnt, pred = accuracy(
             regress.detach().cpu().numpy(), target.detach().cpu().numpy()
         )
-        return loss, joint_acc, 0
+        return loss, avg_acc, 0
 
     def validation_step(self, batch, batch_idx):
         loss, acc, class_acc = self.loss_calculation(batch)

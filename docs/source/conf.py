@@ -65,3 +65,5 @@ autodoc_mock_imports = [
     # "numpy.core.multiarray",
     "sqlalchemy",
 ]
+
+coverage_show_missing_items = True

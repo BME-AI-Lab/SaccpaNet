@@ -8,3 +8,4 @@ sphinx-apidoc -e -M --implicit-namespaces  -f -o docs/source/api src/helpers
 @REM sphinx-apidoc -e -M --implicit-namespaces  -f -o docs/source/experiments 05-Finetuning
 @REM sphinx-apidoc -e -M --implicit-namespaces  -f -o docs/source/experiments 06-Posture_Classification/codes
 ./docs/make.bat html
+docstr-coverage src

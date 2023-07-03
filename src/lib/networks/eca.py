@@ -1,3 +1,5 @@
+# This code is modified from
+# https://github.com/BangguWu/ECANet/blob/master/models/eca_resnet.py
 import math
 
 import torch.nn as nn
@@ -28,6 +30,13 @@ class ECABasicBlock(nn.Module):
         self.stride = stride
 
     def forward(self, x):
+        """ECA BasicBlock forward function.
+
+        Args:
+            x (Tensor): input tensor with shape (N, C, H, W)
+        Returns:
+            Tensor: Shape (N, C, H, W)
+        """
         residual = x
         out = self.conv1(x)
         out = self.bn1(out)
@@ -65,6 +74,13 @@ class ECABottleneck(nn.Module):
         self.stride = stride
 
     def forward(self, x):
+        """ECA Bottleneck forward function.
+
+        Args:
+            x (Tensor): input tensor with shape (N, C, H, W)
+        Returns:
+            Tensor: Shape (N, C, H, W)
+        """
         residual = x
 
         out = self.conv1(x)
@@ -138,6 +154,14 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        """ECA ResNet forward function.
+
+        Args:
+            x (Tensor): input tensor with shape (N, C, H, W)
+
+        Returns:
+            Tensor: Shape (N, num_classes)
+        """
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)

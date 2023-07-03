@@ -15,10 +15,12 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from .codec import MSRAHeatmap
+from ..core.codec import MSRAHeatmap
 from .utils.transforms import affine_transform, fliplr_joints, get_affine_transform
 
 logger = logging.getLogger(__name__)
+
+from configs.dataset_config import *
 
 
 class JointsDataset(Dataset):
@@ -26,7 +28,6 @@ class JointsDataset(Dataset):
         # root, image_set
         self.setup_config_constants()
         self.num_joints = 0
-        self.pixel_std = 200
         self.flip_pairs = []
         self.parent_ids = []
 
@@ -41,21 +42,21 @@ class JointsDataset(Dataset):
             self.image_size,
             self.heatmap_size,
             sigma=self.sigma,
-            unbiased=False,
+            unbiased=True,
             # blur kernel size is not used for biased heatmap
         )
 
     def setup_config_constants(self):
         # image size
-        self.image_size = np.array((192, 256))
+        self.image_size = IMAGE_SIZE
         # heatmap configs
-        self.target_type = "gaussian"
-        self.heatmap_size = np.array((24, 32))
-        self.sigma = 2  # sigma for the gaussian distribution
+        self.target_type = TARGET_TYPE
+        self.heatmap_size = HEATMAP_SIZE
+        self.sigma = SIGMA  # sigma for the gaussian distribution
 
         # transformation config
-        self.scale_factor = 0.2
-        self.rotation_factor = 15  # TBD: double check if the unit is degree
+        self.scale_factor = SCALE_FACTOR
+        self.rotation_factor = ROTATION_FACTOR
 
     def _get_db(self):
         raise NotImplementedError
@@ -120,8 +121,8 @@ class JointsDataset(Dataset):
             input = self.transform(input)
 
         for i in range(self.num_joints):
-            if joints_vis[i, 0] > 0.0:
-                joints[i, 0:2] = affine_transform(joints[i, 0:2], trans)
+            # if joints_vis[i, 0] > 0.0:
+            joints[i, 0:2] = affine_transform(joints[i, 0:2], trans)
 
         heatmap, heatmap_weight = self.generate_heatmap(joints, joints_vis)
 
