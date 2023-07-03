@@ -11,7 +11,8 @@ import numpy as np
 from configs.dataset_config import *
 
 from .codec import MSRAHeatmap
-from .codec.msra_heatmap import get_heatmap_maximum
+
+# from .codec.msra_heatmap import get_heatmap_maximum
 from .inference import get_final_preds, get_max_preds  # need to be changed
 
 
@@ -52,8 +53,8 @@ def accuracy(output, target, hm_type="gaussian", thr=0.1):
     norm = 1.0
     target = target[:, :, (0, 1)]
     if hm_type == "gaussian":
-        pred, _ = get_heatmap_maximum(output)
-        target, _ = get_heatmap_maximum(target)
+        pred, _ = get_final_preds(output)
+        target, _ = get_final_preds(target)
         h = output.shape[2]
         w = output.shape[3]
         norm = np.ones((pred.shape[0], 2)) * np.array([h, w]) / 10

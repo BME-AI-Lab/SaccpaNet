@@ -10,7 +10,7 @@ from lib.procedures.evaluations import update_log, write_log
 log_file = "log.csv"
 if __name__ == "__main__":
     MODEL_NAME = "SACCPA_sample"
-    BATCH_SIZE = 8
+    BATCH_SIZE = 16
     TOTAL_EPOCH = 300
     default_root_dir = f"./log/{MODEL_NAME}"
     train_dataloader, test_dataloader = create_dataloaders(BATCH_SIZE)

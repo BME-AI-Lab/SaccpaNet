@@ -694,7 +694,7 @@ class SaccpaNet(nn.Module):
             drop_rate=0.0,
             drop_path_rate=0.1,
         )
-        head_in_index = [0, 1, 2, 3]
+        head_in_index = [1, 2, 3]
         in_channels = [ws[i] for i in head_in_index]
 
         channels = 1024
