@@ -14,7 +14,7 @@ if __name__ == "__main__":
     TOTAL_EPOCH = 300
     default_root_dir = f"./log/{MODEL_NAME}"
     train_dataloader, test_dataloader = create_dataloaders(BATCH_SIZE)
-    default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
+    default_root_dir = f"{default_root_dir}"
     model = create_kpt(MODEL_NAME, params)
     model, trainer, result = train_and_evaluate(
         MODEL_NAME,
