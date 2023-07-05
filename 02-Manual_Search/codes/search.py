@@ -1,44 +1,31 @@
-# %%
 import gc
-import importlib
-import os
 
 import torch
-from search_configs import params
+from search_configs import *
 
-from lib.procedures import (create_dataloaders, train_and_evaluate, update_log,
-                            write_log)
+from lib.modules.core.sampler import sample_cfgs
+from lib.procedures import create_dataloaders, create_kpt, train_and_evaluate
+from lib.procedures.evaluations import update_log, write_log
 
+log_file = "log.csv"
 if __name__ == "__main__":
-    MODEL_NAME = "saccpa_sample"
-    PRETRAIN_MODEL = "merged_model.pth"
-    seed = 6
-    model = importlib.import_module(f"models.{MODEL_NAME}")
-    BATCH_SIZE = 8
+    MODEL_NAME = "SACCPA_sample"
+    BATCH_SIZE = 16
+    TOTAL_EPOCH = 300
     default_root_dir = f"./log/{MODEL_NAME}"
-    (
-        train_dataloader,
-        test_dataloader,
-    ) = create_dataloaders(BATCH_SIZE)
-    PARAM_NAME = repr(params)
+    train_dataloader, test_dataloader = create_dataloaders(BATCH_SIZE)
     default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
-    model = importlib.import_module(f"models.{MODEL_NAME}")
-    model = model.MyLightningModule(params, num_classes=18)
-    state_dict = torch.load(PRETRAIN_MODEL)
-    model.load_state_dict(state_dict)
-    epoch = 300
-    model, trainer, x = train_and_evaluate(
+    model = create_kpt(MODEL_NAME, params)
+    model, trainer, result = train_and_evaluate(
         MODEL_NAME,
         model,
         default_root_dir,
         train_dataloader,
         test_dataloader,
-        epoch,
+        epochs=TOTAL_EPOCH,
     )
-    update_log(PARAM_NAME, params, x)
-
-    log_file = "log.csv"
-    write_log(params, log_file)
+    update_log(PARAM_NAME, params, result)
+    write_log(params, log_file=log_file)
 
     del trainer
     del model
