@@ -3,6 +3,7 @@ from configs.manually_searched_params import params as sample_params
 from lib.modules.core.sampler import generate_regnet_full
 
 ws, ds = generate_regnet_full(sample_params)
+print("ws:", ws, "ds:", ds)
 norm_cfg = dict(type="BN", requires_grad=True)
 ham_norm_cfg = dict(type="GN", num_groups=32, requires_grad=True)
 
@@ -41,7 +42,7 @@ auto_scale_lr = dict(base_batch_size=512)
 default_hooks = dict(checkpoint=dict(save_best="coco-wholebody/AP", rule="greater"))
 
 # codec settings
-codec = dict(type="MSRAHeatmap", input_size=(192, 256), heatmap_size=(24, 32), sigma=2)
+codec = dict(type="MSRAHeatmap", input_size=(192, 256), heatmap_size=(48, 64), sigma=2)
 
 # model settings
 model = dict(
@@ -53,18 +54,20 @@ model = dict(
         bgr_to_rgb=True,
     ),
     backbone=dict(
-        type="SaccpaNet",
+        type="SACCPA",
         in_channels=3,
-        embed_dims=ws,  # [32, 64, 160, 256],
+        saccpa_in_chans=1,
+        embed_dims=ws,
         mlp_ratios=[8, 8, 4, 4],  # mlp ratio need
-        drop_rate=0.0,
-        drop_path_rate=0.1,
-        depths=ds,  # [3, 3, 5, 2],
-        norm_cfg=dict(type="BN", requires_grad=True),
+        # drop_rate=0.0,
+        # drop_path_rate=0.1,
+        depths=ds,
+        # norm_cfg=dict(type="BN", requires_grad=True),
+        out_indexs=(0, 1, 2, 3),
     ),
     head=dict(
         type="HeatmapHead",
-        in_channels=120,
+        in_channels=sum(ws),
         out_channels=133,
         deconv_out_channels=None,
         loss=dict(type="KeypointMSELoss", use_target_weight=True),

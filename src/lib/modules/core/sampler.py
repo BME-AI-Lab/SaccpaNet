@@ -95,8 +95,8 @@ def check_complexity_constraints(param):
     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
     params = sum([np.prod(p.size()) for p in model_parameters])
     result = params >= MIN_PARAMS and params <= MAX_PARAMS
-    if result:
-        print(params)
+    # if result:
+    #    print(params)
     return result
 
 

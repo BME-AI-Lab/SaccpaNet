@@ -5,6 +5,7 @@ import torch
 import torch.functional as F
 import torch.nn as nn
 from mmengine.model import BaseModule, constant_init, normal_init, trunc_normal_init
+from mmpose.registry import MODELS
 from torch.nn.modules.utils import _pair as to_2tuple
 
 from lib.modules.core.sampler import generate_regnet_full
@@ -272,21 +273,25 @@ class OverlapPatchEmbed(BaseModule):
 class SACCPA(BaseBackbone):
     def __init__(
         self,
-        in_chans=3,
+        in_channels=3,
+        saccpa_in_chans=1,
         embed_dims=[64, 128, 256, 512],
         mlp_ratios=[8, 8, 4, 4],
         depths=[3, 4, 6, 3],
         num_stages=4,
+        out_indexs=[0, 1, 2, 3]
+        # norm_cfg=dict(type="BN", requires_grad=True),
     ):
         super(SACCPA, self).__init__()
         self.depths = depths
         self.num_stages = num_stages
-
+        self.out_indexs = out_indexs
+        self.init_conv = nn.Conv2d(in_channels, 1, 1)
         cur = 0
 
         for i in range(num_stages):
             if i == 0:
-                patch_embed = StemConv(in_chans, embed_dims[0])
+                patch_embed = StemConv(saccpa_in_chans, embed_dims[0])
             else:
                 patch_embed = OverlapPatchEmbed(
                     patch_size=3,
@@ -332,6 +337,7 @@ class SACCPA(BaseBackbone):
         """
         B = x.shape[0]
         outs = []
+        x = self.init_conv(x)
 
         for i in range(self.num_stages):
             patch_embed = getattr(self, f"patch_embed{i + 1}")
@@ -343,8 +349,25 @@ class SACCPA(BaseBackbone):
             x = norm(x)
             x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
             outs.append(x)
-
+        outs = self._scale_and_concat_outs(outs)
         return outs
+
+    def _scale_and_concat_outs(self, outs):
+        outs = [outs[i] for i in self.out_indexs]
+        size = outs[0].shape[2:]
+
+        outs = [
+            resize(
+                level,
+                size=size,
+                mode="bilinear",
+                # align_corners=self.align_corners
+            )
+            for level in outs
+        ]
+
+        outs = torch.cat(outs, dim=1)
+        return [outs]
 
 
 class DWConv(nn.Module):
@@ -671,7 +694,7 @@ class SaccpaNet(nn.Module):
         self.ws, self.ds = ws, ds
         self.head_input = sum(ws[1:4])
         self.backbone = SACCPA(
-            in_chans=1,  # in_chans is fixed at 3 to maintain compatibility with coco pretraining
+            in_channels=1,  # in_chans is fixed at 3 to maintain compatibility with coco pretraining
             embed_dims=ws,  # [64, 128, 320, 512],
             depths=ds,  # [2, 2, 4, 2],
             mlp_ratios=[8, 8, 4, 4],  # mlp ratio need

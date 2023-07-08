@@ -15,7 +15,7 @@ from .resnest import ResNeSt
 from .resnet import ResNet, ResNetV1d
 from .resnext import ResNeXt
 from .rsn import RSN
-from .saccpa import SACCPA_net
+from .saccpa import SACCPA
 from .scnet import SCNet
 from .seresnet import SEResNet
 from .seresnext import SEResNeXt
@@ -58,5 +58,5 @@ __all__ = [
     "PyramidVisionTransformer",
     "PyramidVisionTransformerV2",
     "SwinTransformer",
-    "SACCPA_net",
+    "SACCPA",
 ]
