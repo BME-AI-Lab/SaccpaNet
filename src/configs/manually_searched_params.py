@@ -1,10 +1,8 @@
 params = {
-    "REGNET.DEPTH": 28,
-    "REGNET.W0": 104,
-    "REGNET.WA": 35.7,
-    "REGNET.WM": 2,
-    "REGNET.GROUP_W": 40,
-    "REGNET.BOT_MUL": 1,
+    "REGNET.DEPTH": 17,
+    "REGNET.W0": 8,
+    "REGNET.WA": 12.8,
+    "REGNET.WM": 2.942,
 }
 
 from .update_from_local_configs import update_from_local_configs
