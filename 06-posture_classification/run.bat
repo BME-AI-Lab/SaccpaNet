@@ -1,1 +1,0 @@
-conda activate pytorch-mamba && python directory_runs.py python finetune_classification.py

@@ -21,9 +21,9 @@ def load_pretrained_kpt(KEYPOINT_MODELS, ckpt_path, params):
     return kpt_model
 
 
-def create_cls(CLASSIFICATION_MODELS, kpt_model):
-    model = importlib.import_module(f"models.{CLASSIFICATION_MODELS}")
-    model = model.MyLightningModule(kpt_model)
+def create_cls(cls_model, kpt_model):
+    model = importlib.import_module(f"models.ClassificationWithCoordinate")
+    model = model.MyLightningModule(kpt_model, cls_model)
     return model
 
 
@@ -40,19 +40,16 @@ def load_cls_model(default_root_dir, model):
     return model, RESULT_DIR
 
 
-def create_cls_kpt(KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path, params):
+def create_cls_kpt(KEYPOINT_MODELS, cls_model, ckpt_path, params):
     kpt_model = load_pretrained_kpt(KEYPOINT_MODELS, ckpt_path, params)
-    model = create_cls(CLASSIFICATION_MODELS, kpt_model)
+    model = create_cls(cls_model, kpt_model)
     return model
 
 
-def create_load_cls_kpt(
-    KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path, params, default_root_dir
-):
+def load_cls_kpt(KEYPOINT_MODELS, cls_model, ckpt_path, params, default_root_dir):
     kpt_model = load_pretrained_kpt(KEYPOINT_MODELS, ckpt_path, params)
-    model = create_cls(CLASSIFICATION_MODELS, kpt_model)
+    model = create_cls(cls_model, kpt_model)
     print(default_root_dir)
-    # find_files = glob(f"{default_root_dir}/lightning_logs/*/checkpoints/*.ckpt")
     model, RESULT_DIR = load_cls_model(default_root_dir, model)
     return model, RESULT_DIR
 

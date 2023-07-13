@@ -3,7 +3,7 @@ import torchvision.models as models
 from torch import nn
 
 from lib.modules.core.loss import JointsMSELoss
-from lib.modules.core.SpatialSoftArgmax2d import SpatialSoftArgmax2d
+from lib.modules.core.SpatialArgmax2d import HardArgmax2d
 
 from .ClassificationBase import ClassificationModule
 from .hyperparameters import l2, lr
@@ -28,7 +28,7 @@ class MyLightningModule(ClassificationModule):
         self.end = nn.GELU()
         self.dense3 = nn.Linear(256, num_classes)
         self.preNorm = nn.BatchNorm2d(num_features=1)
-        self.spatialSoftArgMax = SpatialSoftArgmax2d(normalized_coordinates=True)
+        self.spatialArgMax = HardArgmax2d(normalized_coordinates=True)
 
     def forward(self, input):
         input = input.float()
@@ -36,7 +36,7 @@ class MyLightningModule(ClassificationModule):
         x = self.init_conv(input)
         with torch.no_grad():
             regress = self.coordinate_net(input)
-            coordinates = self.spatialSoftArgMax(regress[0])  # TBD: double check
+            coordinates = self.spatialArgMax(regress[0])  # TBD: double check
             coordinates = coordinates.flatten(start_dim=1)
 
         x = self.classify_net(x)

@@ -1,16 +1,20 @@
+from get_classification_model import classification_models
+from search_config import CLASSIFICATION_MODELS
+
+from configs.manually_searched_params import params
 from lib.procedures import *
 from lib.procedures import create_cls_kpt
 
 if __name__ == "__main__":
-    KEYPOINT_MODELS = "saccpa_sample"
-    CLASSIFICATION_MODELS = "ScappaClass"
-    ckpt_path = "log\\saccpa_sample\\15-fine_tuning\\lightning_logs\\version_6\\checkpoints\\best-epoch=069-val_loss=0.344.ckpt"
+    KEYPOINT_MODELS = "SACCPA_sample"
+    CKPT_PATH = "../best-epoch.ckpt"
     BATCH_SIZE = 16
     default_root_dir = f"./log/{CLASSIFICATION_MODELS}"
     train_dataloader, test_dataloader = create_dataloaders(BATCH_SIZE)
+    cls_model = classification_models[CLASSIFICATION_MODELS](num_classes=1000)
 
-    model = create_cls_kpt(KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path)
-    epoch = 500
+    model = create_cls_kpt(KEYPOINT_MODELS, cls_model, CKPT_PATH, params)
+    epochs = 1  # 500
     MODEL_NAME = f"{CLASSIFICATION_MODELS}+{KEYPOINT_MODELS}"
     model, trainer, x = train_and_evaluate(
         MODEL_NAME,
@@ -18,7 +22,7 @@ if __name__ == "__main__":
         default_root_dir,
         train_dataloader,
         test_dataloader,
-        epoch=epoch,
+        epochs=epochs,
     )
     x = trainer.test(model, test_dataloader, verbose=True)
     print(x)

@@ -2,6 +2,36 @@ import torch
 from torch import nn
 
 
+class HardArgmax2d(nn.Module):
+    def __init__(self, normalized_coordinates):
+        super().__init__()
+        self.normalized_coordinates = normalized_coordinates
+
+    def forward(self, input):
+        heatmaps = input
+        assert (
+            heatmaps.ndim == 3 or heatmaps.ndim == 4
+        ), f"Invalid shape {heatmaps.shape}"
+        if len(heatmaps.shape) == 4:
+            B, C, H, W = heatmaps.shape
+            heatmaps_flatten = heatmaps.reshape(B * C, -1)
+        elif len(heatmaps.shape) == 3:
+            C, H, W = heatmaps.shape
+            B = None
+            heatmaps_flatten = heatmaps.reshape(C, -1)
+        # argmax
+        value, index = heatmaps_flatten.max(dim=-1)
+        x_locs, y_locs = index % W, index // W
+        locs = torch.stack([x_locs, y_locs], dim=-1)
+        locs[value <= 0] = -1
+        if B:
+            locs = locs.reshape(B, C, 2)
+            # value = value.reshape(B, C)
+        if self.normalized_coordinates:
+            locs = locs / torch.tensor([H, W], device=locs.device, dtype=locs.dtype)
+        return locs
+
+
 class SpatialSoftArgmax2d(nn.Module):
     r"""Creates a module that computes the Spatial Soft-Argmax 2D
     of a given input heatmap.

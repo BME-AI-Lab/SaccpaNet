@@ -1,13 +1,17 @@
+from get_classification_model import classification_models
+from search_config import CLASSIFICATION_MODELS
 from sklearn.metrics import *
 
 from configs.manually_searched_params import params
-from lib.procedures import (create_load_cls_kpt, create_validation_dataloader,
-                            evaluate_cls,
-                            inference_model_classification_coordinate)
+from lib.procedures import (
+    create_validation_dataloader,
+    evaluate_cls,
+    inference_model_classification_coordinate,
+    load_cls_kpt,
+)
 
-KEYPOINT_MODELS = "saccpa_sample"
-CLASSIFICATION_MODELS = "ScappaClass"
-ckpt_path = "log\\saccpa_sample\\15-fine_tuning\\lightning_logs\\version_6\\checkpoints\\best-epoch=069-val_loss=0.344.ckpt"
+KEYPOINT_MODELS = "SACCPA_sample"
+ckpt_path = "../best-epcoh.ckpt"
 
 BATCH_SIZE = 1
 default_root_dir = f"./log/{CLASSIFICATION_MODELS}"
@@ -15,28 +19,28 @@ NO_QUILT_TRAIN = False
 MIX_TRAIN = True
 WITH_QUILT = True
 VALIDATION = True
-ALL_CONDITIONS_STRING = (
-    f"TrainQuilt{NO_QUILT_TRAIN}_MixTrain{MIX_TRAIN}_TestWithQuilt{WITH_QUILT}"
-)
+cls_model = classification_models[CLASSIFICATION_MODELS](num_classes=1000)
+for VALIDATION in [True, False]:
+    ALL_CONDITIONS_STRING = f"TestWithQuilt{WITH_QUILT}_Validation{VALIDATION}"
 
-test_dataloader = create_validation_dataloader(BATCH_SIZE, WITH_QUILT, VALIDATION)
-model, RESULT_DIR = create_load_cls_kpt(
-    KEYPOINT_MODELS, CLASSIFICATION_MODELS, ckpt_path, params, default_root_dir
-)
-(
-    ly,
-    ly_hat,
-    image_ids,
-    ly_weight,
-    input_storage,
-) = inference_model_classification_coordinate(test_dataloader, model)
+    test_dataloader = create_validation_dataloader(BATCH_SIZE, WITH_QUILT, VALIDATION)
+    model, RESULT_DIR = load_cls_kpt(
+        KEYPOINT_MODELS, cls_model, ckpt_path, params, default_root_dir
+    )
+    (
+        ly,
+        ly_hat,
+        image_ids,
+        ly_weight,
+        input_storage,
+    ) = inference_model_classification_coordinate(test_dataloader, model)
 
-evaluate_cls(
-    ALL_CONDITIONS_STRING,
-    RESULT_DIR,
-    ly,
-    ly_hat,
-    image_ids,
-    ly_weight,
-    input_storage,
-)
+    evaluate_cls(
+        ALL_CONDITIONS_STRING,
+        RESULT_DIR,
+        ly,
+        ly_hat,
+        image_ids,
+        ly_weight,
+        input_storage,
+    )
