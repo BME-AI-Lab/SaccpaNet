@@ -14,7 +14,7 @@ if __name__ == "__main__":
     cls_model = classification_models[CLASSIFICATION_MODELS](num_classes=1000)
 
     model = create_cls_kpt(KEYPOINT_MODELS, cls_model, CKPT_PATH, params)
-    epochs = 1  # 500
+    epochs = 500
     MODEL_NAME = f"{CLASSIFICATION_MODELS}+{KEYPOINT_MODELS}"
     model, trainer, x = train_and_evaluate(
         MODEL_NAME,
