@@ -1,5 +1,5 @@
 from get_classification_model import classification_models
-from search_config import CLASSIFICATION_MODELS
+from search_configs import CLASSIFICATION_MODELS
 
 from configs.manually_searched_params import params
 from lib.procedures import *

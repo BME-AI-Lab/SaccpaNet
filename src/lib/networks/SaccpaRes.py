@@ -24,7 +24,7 @@ class SaccpaBasicBlock(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = conv3x3(planes, planes, 1)
         self.bn2 = nn.BatchNorm2d(planes)
-        self.saccpa = SpatialAttention(planes, k_size)
+        self.saccpa = SpatialAttention(planes)
         self.downsample = downsample
         self.stride = stride
 
@@ -61,7 +61,7 @@ class SaccpaBottleneck(nn.Module):
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4)
         self.relu = nn.ReLU(inplace=True)
-        self.saccpa = SpatialAttention(planes * 4, k_size)
+        self.saccpa = SpatialAttention(planes * 4)
         self.downsample = downsample
         self.stride = stride
 

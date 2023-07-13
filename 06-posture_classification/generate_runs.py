@@ -30,7 +30,7 @@ MODELS = [
 def search_range():
     for models in MODELS:
         representation = f"{models}"
-        params_str = f"CLASSIFICATION_MODELS = {models}\n"
+        params_str = f"CLASSIFICATION_MODELS = '{models}'\n"
         copy_and_write(representation, params_str)
 
 
