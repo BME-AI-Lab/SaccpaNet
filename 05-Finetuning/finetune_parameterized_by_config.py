@@ -16,7 +16,7 @@ if __name__ == "__main__":
     default_root_dir = f"./log/{MODEL_NAME}"
     (
         train_dataloader,
-        test_dataloader,
+        val_dataloader,
     ) = create_dataloaders(BATCH_SIZE)
     PARAM_NAME = os.path.basename(os.getcwd())
     default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         model,
         default_root_dir,
         train_dataloader,
-        test_dataloader,
+        val_dataloader,
         epoch,
     )
     update_log(PARAM_NAME, params, x)

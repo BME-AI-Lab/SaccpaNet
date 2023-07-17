@@ -4,6 +4,7 @@ from sklearn.metrics import *
 
 from configs.manually_searched_params import params
 from lib.procedures import (
+    create_test_dataloader,
     create_validation_dataloader,
     evaluate_cls,
     inference_model_classification_coordinate,
@@ -22,8 +23,12 @@ VALIDATION = True
 cls_model = classification_models[CLASSIFICATION_MODELS](num_classes=1000)
 for VALIDATION in [True, False]:
     ALL_CONDITIONS_STRING = f"TestWithQuilt{WITH_QUILT}_Validation{VALIDATION}"
-
-    test_dataloader = create_validation_dataloader(BATCH_SIZE, WITH_QUILT, VALIDATION)
+    if VALIDATION:
+        test_dataloader = create_validation_dataloader(
+            BATCH_SIZE, WITH_QUILT, VALIDATION
+        )
+    else:
+        test_dataloader = create_test_dataloader(BATCH_SIZE)
     model, RESULT_DIR = load_cls_kpt(
         KEYPOINT_MODELS, cls_model, ckpt_path, params, default_root_dir
     )

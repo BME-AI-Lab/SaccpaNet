@@ -34,7 +34,7 @@ def test_saccpa_sample():
     default_root_dir = f"./log/{MODEL_NAME}"
     (
         train_dataloader,
-        test_dataloader,
+        val_dataloader,
     ) = create_dataloaders(BATCH_SIZE)
     PARAM_NAME = os.path.basename(os.getcwd())
     default_root_dir = f"{default_root_dir}/{PARAM_NAME}"
@@ -47,8 +47,8 @@ def test_saccpa_sample():
         limit_train_batches=1 / 168,
         limit_test_batches=0.05,
     )
-    trainer.fit(model, train_dataloader, test_dataloader)
-    trainer.test(model, test_dataloader, verbose=True)
+    trainer.fit(model, train_dataloader, val_dataloader)
+    trainer.test(model, val_dataloader, verbose=True)
 
 
 def test_classification_network():

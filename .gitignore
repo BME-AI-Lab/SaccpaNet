@@ -23,6 +23,8 @@ docs/source/api/
 docs/source/experiments/
 runs/
 retired_runs/
+**/runs/
+**/retired_runs/
 set_env.bat
 benchmark/
 *.zip

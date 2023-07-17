@@ -10,7 +10,7 @@ if __name__ == "__main__":
     CKPT_PATH = "../best-epoch.ckpt"
     BATCH_SIZE = 16
     default_root_dir = f"./log/{CLASSIFICATION_MODELS}"
-    train_dataloader, test_dataloader = create_dataloaders(BATCH_SIZE)
+    train_dataloader, val_dataloader = create_dataloaders(BATCH_SIZE)
     cls_model = classification_models[CLASSIFICATION_MODELS](num_classes=1000)
 
     model = create_cls_kpt(KEYPOINT_MODELS, cls_model, CKPT_PATH, params)
@@ -21,8 +21,8 @@ if __name__ == "__main__":
         model,
         default_root_dir,
         train_dataloader,
-        test_dataloader,
+        val_dataloader,
         epochs=epochs,
     )
-    x = trainer.test(model, test_dataloader, verbose=True)
+    x = trainer.test(model, val_dataloader, verbose=True)
     print(x)
