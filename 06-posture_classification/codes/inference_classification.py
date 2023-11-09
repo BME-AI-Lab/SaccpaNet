@@ -20,32 +20,31 @@ NO_QUILT_TRAIN = False
 MIX_TRAIN = True
 WITH_QUILT = True
 VALIDATION = True
-cls_model = classification_models[CLASSIFICATION_MODELS](num_classes=1000)
-for VALIDATION in [True, False]:
-    ALL_CONDITIONS_STRING = f"TestWithQuilt{WITH_QUILT}_Validation{VALIDATION}"
-    if VALIDATION:
-        test_dataloader = create_validation_dataloader(
-            BATCH_SIZE, WITH_QUILT, VALIDATION
+if __name__ == "__main__":
+    cls_model = classification_models[CLASSIFICATION_MODELS](num_classes=1000)
+    for VALIDATION in [True, False]:
+        ALL_CONDITIONS_STRING = f"TestWithQuilt{WITH_QUILT}_Validation{VALIDATION}"
+        if VALIDATION:
+            test_dataloader = create_validation_dataloader(BATCH_SIZE, WITH_QUILT)
+        else:
+            test_dataloader = create_test_dataloader(BATCH_SIZE)
+        model, RESULT_DIR = load_cls_kpt(
+            KEYPOINT_MODELS, cls_model, ckpt_path, params, default_root_dir
         )
-    else:
-        test_dataloader = create_test_dataloader(BATCH_SIZE)
-    model, RESULT_DIR = load_cls_kpt(
-        KEYPOINT_MODELS, cls_model, ckpt_path, params, default_root_dir
-    )
-    (
-        ly,
-        ly_hat,
-        image_ids,
-        ly_weight,
-        input_storage,
-    ) = inference_model_classification_coordinate(test_dataloader, model)
+        (
+            ly,
+            ly_hat,
+            image_ids,
+            ly_weight,
+            input_storage,
+        ) = inference_model_classification_coordinate(test_dataloader, model)
 
-    evaluate_cls(
-        ALL_CONDITIONS_STRING,
-        RESULT_DIR,
-        ly,
-        ly_hat,
-        image_ids,
-        ly_weight,
-        input_storage,
-    )
+        evaluate_cls(
+            ALL_CONDITIONS_STRING,
+            RESULT_DIR,
+            ly,
+            ly_hat,
+            image_ids,
+            ly_weight,
+            input_storage,
+        )

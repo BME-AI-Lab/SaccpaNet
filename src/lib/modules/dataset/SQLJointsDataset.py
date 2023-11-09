@@ -206,6 +206,8 @@ class SQLJointsDataset(JointsDataset):
             "p": "b",
         }
         posture_symbol = self.annotations_df.posture.iloc[idx]
+        effect_symbol = self.annotations_df.effect.iloc[idx]
+        meta["effect"] = effect_symbol
         if "flipped" in meta and meta["flipped"]:
             posture_symbol = flip_symbol[posture_symbol]
         meta["posture"] = posture_groups[7][posture_symbol]

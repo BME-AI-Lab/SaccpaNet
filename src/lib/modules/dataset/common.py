@@ -66,7 +66,7 @@ class ResolveImage:
         # new_y2 = int((rec.y2-rec.y1)/3+rec.y1)#1/3 head patch
         result = img[rec.y1 : rec.y2, rec.x1 : rec.x2]
         # result = img[rec.y1:new_y2,rec.x1:rec.x2]
-        result = fill_hole(result)
+        # result = fill_hole(result)
         p1 = np.percentile(result.flatten(), 1)
         p99 = np.percentile(result.flatten(), 99)
         result = np.clip(result, p1, p99)

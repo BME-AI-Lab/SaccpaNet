@@ -1,12 +1,20 @@
 import csv
 import os
+from copy import deepcopy
 from itertools import cycle
 
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import (auc, classification_report, confusion_matrix,
-                             f1_score, roc_auc_score, roc_curve,
-                             top_k_accuracy_score)
+import pandas as pd
+from sklearn.metrics import (
+    auc,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    roc_auc_score,
+    roc_curve,
+    top_k_accuracy_score,
+)
 from torch import nn
 
 
@@ -181,3 +189,51 @@ def inference_model_classification_coordinate(test_dataloader, model):
     ly_weight = np.concatenate(ly_weight)
     input_storage = np.concatenate(input_storage)
     return ly, ly_hat, image_ids, ly_weight, input_storage
+
+
+def inference_clasification_model(test_dataloader, model):
+    softmax = nn.Softmax(dim=1)
+    result = []
+    label2id = {"r": 0, "o": 1, "y": 2, "g": 3, "c": 4, "b": 5, "p": 6}
+    id2label = {v: k for k, v in label2id.items()}
+    posture_map = [
+        "supine",
+        "right log",
+        "right fetal",
+        "left log",
+        "left fetal",
+        "prone right",
+        "prone left",
+    ]
+    id2posture = {v: posture_map[k] for k, v in label2id.items()}
+    for batch in test_dataloader:
+        image, target, target_weight, meta = batch
+        """The dicionary meta contains the following keys:
+        "image": image_file,
+        "filename": filename,
+        "imgnum": imgnum,
+        "joints": joints,
+        "joints_vis": joints_vis,
+        "center": center,
+        "scale": scale,
+        "rotation": rotation,
+        "score": score,
+        "flipped": flipped,
+        "posture": posture,        
+        """
+        result_dict = deepcopy(meta)
+        batch = (
+            input.cuda().detach(),
+            target.cuda().detach(),
+            target_weight.cuda().detach().detach(),
+            meta,
+        )
+        result = model.get_batch_output(batch)  # .detach()
+        classify = result["classify"]
+        if classify.shape[1] > 7:
+            classify = classify[:, :7]  # fix num_class
+
+        classify = softmax(classify).cpu()
+        result_dict["class_result"] = classify
+    df = pd.DataFrame(result)
+    return df

@@ -44,3 +44,6 @@ coverage.xml
 .pytest_cache/
 *.pth
 log.csv
+images/
+images_/
+*.jpg

@@ -83,13 +83,20 @@ python transfer_weight.py best_coco-wholebody_AP_epoch_*.pth template_checkpoint
 :: Copy the transfered weight to 05-Finetuning folder 
 copy 04-Weight_Transfer/merged_model.pth 05-Finetuning/merged_model.pth
 :: Run the training
+cd 05-Finetuning
 python finetune_parameterized_by_config.py
 ```
+It will produce two weight file in `05-Finetuning\log\SACCPA_sample\05-Finetuning\lightning_logs\version_0\checkpoints`
+Copy the file `best-epoch=*-val_loss=*.ckpt` to file `06-Posture_Classification\runs\best-epoch.ckpt`  .
 
 ## 06. Posture Classification
 ``` batch
-:: Copy the joint coordinate model weight to 06-Posture_Classification
-copy 05-Finetuning/merged_model.pth 06-Posture_Classification
 :: Generate the runs for all classification models being tried.
-python 
+cd 06-Posture_Classification
+python generate_runs.py
+:: Running the the list of classification models
+python -m helper.local_run -f runs -s finetune_classification.py
 
+:: After finishing the download, run 
+
+```
