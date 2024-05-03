@@ -25,6 +25,8 @@ runs/
 retired_runs/
 **/runs/
 **/retired_runs/
+**/retire_disabled/
+**/retire/
 set_env.bat
 benchmark/
 *.zip

@@ -7,6 +7,6 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     url="https://github.com/your-name/your_app",
-    license="MIT",
+    # license="dynamic",
     description="Shared common library for posture experiment",
 )
