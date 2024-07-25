@@ -3,8 +3,12 @@ import os
 import numpy as np
 
 DATALOADER_WORKERS = 4
-SQLITE_DB_PATH = "D:\\Posture Coordinate Models\\dataset.db"
+SQLITE_DB_PATH = "C:\\Posture Coordinate Models\\dataset.db"
 DB_CONNECTION_STRING = f"sqlite:///{SQLITE_DB_PATH}"
+
+# Augmentation dataset setup
+FLIPCUT_AUGMENTED_SQLITE_DB_PATH = "C:\\Posture Coordinate Models\\augmented_dataset.db"
+FLIPCUT_AUGMENTED_DB_CONNECTION_STRING = f"sqlite:///{FLIPCUT_AUGMENTED_SQLITE_DB_PATH}"
 
 # IMAGE SETUP
 IMAGE_SIZE = np.array((192, 256))

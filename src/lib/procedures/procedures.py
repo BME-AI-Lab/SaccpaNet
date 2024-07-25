@@ -77,7 +77,7 @@ def train_model(
     test_dataloader,
     epoch,
 ):
-    import helper.tqdm_hook
+    # import helper.tqdm_hook
 
     checkpoint_callback_best = ModelCheckpoint(
         save_top_k=1,
@@ -95,9 +95,9 @@ def train_model(
     )
     trainer = pl.Trainer(
         gpus=[0],
-        amp_level="O2",
-        accelerator="dp",
-        amp_backend="apex",
+        # amp_level="O2",
+        # accelerator="dp",
+        # amp_backend="apex",
         max_epochs=epoch,
         min_epochs=epoch,
         default_root_dir=default_root_dir,

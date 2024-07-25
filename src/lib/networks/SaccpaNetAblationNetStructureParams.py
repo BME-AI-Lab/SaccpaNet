@@ -124,47 +124,58 @@ class UAttentionLayer(nn.Module):
 
 
 class UAttention(nn.Module):
-    def __init__(self, dim, reduction_ratio=[2, 2]):
+    def __init__(self, dim, reduction_ratio=[2, 2], arms=3):
         super().__init__()
-        self.conv0 = nn.Conv2d(dim, dim, 5, padding=2, groups=dim)
-        self.down1_0 = UAttentionLayer(dim)
-        self.down1_1 = nn.MaxPool2d(reduction_ratio[0])
-        self.down2_0 = UAttentionLayer(dim)
-        self.down2_1 = nn.MaxPool2d(reduction_ratio[1])
-        self.down3_0 = UAttentionLayer(dim)
-        self.conv3 = nn.Conv2d(dim * 3, dim, 1)
+        self.arms = arms  # arms
+        if arms >= 1:
+            self.down1_0 = UAttentionLayer(dim)
+            self.down1_1 = nn.MaxPool2d(reduction_ratio[0])
+            if arms >= 2:
+                self.down2_0 = UAttentionLayer(dim)
+                self.down2_1 = nn.MaxPool2d(reduction_ratio[1])
+                if arms >= 3:
+                    self.down3_0 = UAttentionLayer(dim)
+            self.conv3 = nn.Conv2d(dim * arms, dim, 1)
 
     def forward(self, x):
-        u = x  # .clone()
+        u = x.clone()
         attn = x  # self.conv0(x)
+        if self.arms == 0:
+            return u
+        if self.arms >= 1:
+            attn_0 = self.down1_0(attn)
+            x = self.down1_1(attn_0.clone())
+            if self.arms >= 2:
+                attn_1 = self.down2_0(x)
+                x = self.down2_1(attn_1.clone())
+                attn_1 = nn.functional.interpolate(
+                    attn_1.clone(), u.shape[2:], mode="bilinear"
+                )
 
-        attn_0 = self.down1_0(attn)
-        x = self.down1_1(attn_0.clone())
+                if self.arms >= 3:
+                    attn_2 = self.down3_0(x)
+                    attn_2 = nn.functional.interpolate(
+                        attn_2.clone(), u.shape[2:], mode="bilinear"
+                    )
+                    attn = torch.concat([attn_0, attn_1, attn_2], axis=1)
+                else:
+                    attn = torch.concat([attn_0, attn_1], axis=1)
+            else:
+                attn = attn_0
+            # attn = torch.concat([attn_0, attn_1, attn_2], axis=1)
 
-        attn_1 = self.down2_0(x)
-        x = self.down2_1(attn_1.clone())
-
-        attn_2 = self.down3_0(x)
-        attn_1 = nn.functional.interpolate(
-            attn_1.clone(), u.shape[2:], mode="bilinear", antialias=False
-        )
-        attn_2 = nn.functional.interpolate(
-            attn_2.clone(), u.shape[2:], mode="bilinear", antialias=False
-        )
-        attn = torch.concat([attn_0, attn_1, attn_2], axis=1)
-
-        attn = self.conv3(attn)
+            attn = self.conv3(attn)
 
         return attn * u
 
 
 class SpatialAttention(nn.Module):
-    def __init__(self, d_model):
+    def __init__(self, d_model, uattention_arms=3):
         super().__init__()
         self.d_model = d_model
         self.proj_1 = nn.Conv2d(d_model, d_model, 1)
         self.activation = nn.GELU()
-        self.spatial_gating_unit = UAttention(d_model)
+        self.spatial_gating_unit = UAttention(d_model, arms=uattention_arms)
         self.proj_2 = nn.Conv2d(d_model, d_model, 1)
 
     def forward(self, x):
@@ -183,10 +194,11 @@ class Block(nn.Module):
         dim,
         mlp_ratio=4.0,
         act_layer=nn.GELU,
+        uattention_arms=3,
     ):
         super().__init__()
         self.norm1 = nn.BatchNorm2d(dim)
-        self.attn = SpatialAttention(dim)
+        self.attn = SpatialAttention(dim, uattention_arms=uattention_arms)
 
         self.norm2 = nn.BatchNorm2d(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
@@ -272,6 +284,7 @@ class SACCPA(nn.Module):
         mlp_ratios=[8, 8, 4, 4],
         depths=[3, 4, 6, 3],
         num_stages=4,
+        uattention_arms=3,
     ):
         super(SACCPA, self).__init__()
         self.depths = depths
@@ -295,6 +308,7 @@ class SACCPA(nn.Module):
                     Block(
                         dim=embed_dims[i],
                         mlp_ratio=mlp_ratios[i],
+                        uattention_arms=uattention_arms,
                     )
                     for j in range(depths[i])
                 ]
@@ -652,7 +666,7 @@ class LightHamHead(nn.Module):
 
 
 class SaccpaNet(nn.Module):
-    def __init__(self, params={}, num_joints=18):
+    def __init__(self, params={}, num_joints=18, uattention_arms=3):
         """SCAPPA based regression Network.
 
 
@@ -663,16 +677,25 @@ class SaccpaNet(nn.Module):
         super().__init__()
         assert len(params) > 0  # check if params is empty
         self.params = params
-        ws, ds = generate_regnet_full(params)
+        ws, ds = (
+            params["REGNET.WS"],
+            params["REGNET.DS"],
+        )  # generate_regnet_full(params)
+        assert len(ws) == len(ds)  # check if ws and ds have the same length
+        stages = len(ds)
+        assert stages <= 4  # check if stages is less than or equal to 4
         self.ws, self.ds = ws, ds
-        self.head_input = sum(ws[1:4])
+        self.head_input = sum(ws)  # [1:4]
+        mlp_ratios = [8, 8, 4, 4][:stages]
         self.backbone = SACCPA(
             in_chans=1,  # in_chans is fixed at 3 to maintain compatibility with coco pretraining
             embed_dims=ws,  # [64, 128, 320, 512],
             depths=ds,  # [2, 2, 4, 2],
-            mlp_ratios=[8, 8, 4, 4],  # mlp ratio need
+            mlp_ratios=mlp_ratios,  # mlp ratio need
+            uattention_arms=uattention_arms,
+            num_stages=stages,
         )
-        head_in_index = [0, 1, 2, 3]
+        head_in_index = [i for i in range(stages)]
         in_channels = [ws[i] for i in head_in_index]
 
         channels = 1024

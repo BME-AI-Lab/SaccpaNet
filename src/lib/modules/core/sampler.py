@@ -145,3 +145,7 @@ def sample_cfgs(seed, sample_size=32):
         if len(cfgs) >= sample_size:
             break
     return cfgs
+
+
+if __name__ == "__main__":
+    pass

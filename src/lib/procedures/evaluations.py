@@ -36,69 +36,58 @@ def update_log(PARAM_NAME, params, x):
     params["key"] = PARAM_NAME
 
 
-def plot_auc(RESULT_DIR, ly, ly_weight):
-    b = np.zeros((ly.size, ly.max() + 1))
-    b[np.arange(ly.size), ly] = 1
-    ly = b
-    fpr, tpr, threshold = {}, {}, {}
-    roc_auc = {}
-    n_classes = 7
-    for i in range(n_classes):
-        fpr[i], tpr[i], threshold[i] = roc_curve(ly[i], ly_weight[i])
-        roc_auc[i] = auc(fpr[i], tpr[i])
-    all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+def save_roc(ly, ly_weight):
+    from scipy import interp
+
+    y_true = ly  # np.array(y_true)
+    classes_to_plot = None
+    classes = np.unique(y_true)
+    probas = ly_weight
+    classes_names = [
+        "supine",
+        "right log",
+        "right fetal",
+        "left log",
+        "left fetal",
+        "prone right",
+        "prone left",
+    ]
+
+    if classes_to_plot is None:
+        classes_to_plot = classes
+
+    fpr_dict = dict()
+    tpr_dict = dict()
+    indices_to_plot = np.in1d(classes, classes_to_plot)
+    for i, to_plot in enumerate(indices_to_plot):
+        fpr_dict[i], tpr_dict[i], _ = roc_curve(
+            y_true, probas[:, i], pos_label=classes[i]
+        )
+
+    # Compute macro-average ROC curve and ROC area
+    # First aggregate all false positive rates
+    all_fpr = np.unique(np.concatenate([fpr_dict[x] for x in range(len(classes))]))
 
     # Then interpolate all ROC curves at this points
     mean_tpr = np.zeros_like(all_fpr)
-    for i in range(n_classes):
-        mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+    for i in range(len(classes)):
+        mean_tpr += interp(all_fpr, fpr_dict[i], tpr_dict[i])
 
     # Finally average it and compute AUC
-    mean_tpr /= n_classes
-    fpr["macro"] = all_fpr
-    tpr["macro"] = mean_tpr
-    roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+    mean_tpr /= len(classes)
+    # all_fpr, mean_tpr
 
-    # Plot all ROC curves
-    plt.figure()
-    # plt.plot(
-    #     fpr["micro"],
-    #     tpr["micro"],
-    #     label="micro-average ROC curve (area = {0:0.2f})".format(roc_auc["micro"]),
-    #     color="deeppink",
-    #     linestyle=":",
-    #     linewidth=4,
-    # )
+    return all_fpr, mean_tpr
 
-    plt.plot(
-        fpr["macro"],
-        tpr["macro"],
-        label="macro-average ROC curve (area = {0:0.2f})".format(roc_auc["macro"]),
-        color="navy",
-        linestyle=":",
-        linewidth=4,
-    )
-    lw = 2
-    colors = cycle(["aqua", "darkorange", "cornflowerblue"])
-    for i, color in zip(range(n_classes), colors):
-        plt.plot(
-            fpr[i],
-            tpr[i],
-            color=color,
-            lw=lw,
-            label="ROC curve of class {0} (area = {1:0.2f})".format(i, roc_auc[i]),
-        )
 
-    plt.plot([0, 1], [0, 1], "k--", lw=lw)
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("Some extension of Receiver operating characteristic to multiclass")
-    plt.legend(loc="lower right")
-    # plt.show()
-    plt.savefig(f"{RESULT_DIR}/roc.png", bbox_inches="tight")
-    plt.clf()
+def save_auc(RESULT_DIR, ly, ly_weight):
+    import scikitplot as skplt
+
+    # scikitplot_plot_roc(ly, ly_weight)
+    os.makedirs(RESULT_DIR, exist_ok=True)
+    all_fpr, mean_tpr = save_roc(ly, ly_weight)
+    np.save(f"{RESULT_DIR}/all_fpr.npy", all_fpr)
+    np.save(f"{RESULT_DIR}/mean_tpr.npy", mean_tpr)
 
 
 def write(filename, string):
@@ -131,7 +120,7 @@ def evaluate_cls(
     result_string = f"f1:{f1}, auc:{auc_score}, top2:{top2}"
     write(f"{RESULT_DIR}/{ALL_CONDITIONS_STRING}_aux.txt", result_string)
     print(result_string)
-    plot_auc(RESULT_DIR, ly, ly_weight)
+    save_auc(f"{RESULT_DIR}/{ALL_CONDITIONS_STRING}", ly, ly_weight)
     results = []
     filter = ly != ly_hat
     dataset_positions = np.array(range(len(ly)))[filter]
@@ -181,7 +170,7 @@ def inference_model_classification_coordinate(test_dataloader, model):
             classify.argmax(dim=-1).detach().cpu().numpy()
         )  # classify.argmax(dim=-1).cpu().numpy())
         image_ids.append(meta["image"].cpu().numpy())
-        ly_weight.append(softmax(classify).detach().cpu().numpy())
+        ly_weight.append(classify.detach().numpy())
         input_storage.append(input.cpu().numpy())
 
     ly, ly_hat = np.concatenate(ly), np.concatenate(ly_hat)

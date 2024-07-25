@@ -49,3 +49,11 @@ log.csv
 images/
 images_/
 *.jpg
+*.npy
+*.db
+*.pickle
+*.pkl
+*.csv
+old codes/
+16-GradCam/
+13-JointVisualization/
