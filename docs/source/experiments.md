@@ -97,6 +97,4 @@ python generate_runs.py
 :: Running the the list of classification models
 python -m helper.local_run -f runs -s finetune_classification.py
 
-:: After finishing the download, run 
-
 ```

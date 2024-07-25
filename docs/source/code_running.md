@@ -4,7 +4,7 @@ The code is tested on windows, and in theory should also work on linux.
 
 ## Installing related dependecies
 ### Using Windows with conda
-Create the `pytorch-mamba` python environment based and conda and the provided enviroment.yml
+Create the `posture_experiment` python environment based and conda and the provided enviroment.yml
 ``` batch
 conda env create -f environment.yml
 conda activate posture_experiment
