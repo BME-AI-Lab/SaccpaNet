@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lib.modules.core.codec.heatmap_utils module &mdash; Posture Experiment 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="lib.modules.core.codec.msra_heatmap module" href="lib.modules.core.codec.msra_heatmap.html" />
+    <link rel="prev" title="lib.modules.core.codec package" href="lib.modules.core.codec.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Posture Experiment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../project_organization.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code_running.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments.html">Experiments</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference_index.html">Reference Index</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="lib.html">lib package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="lib.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="lib.modules.html">lib.modules package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lib.networks.html">lib.networks namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lib.procedures.html">lib.procedures package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Posture Experiment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../reference_index.html">Reference Index</a></li>
+          <li class="breadcrumb-item"><a href="lib.html">lib package</a></li>
+          <li class="breadcrumb-item"><a href="lib.modules.html">lib.modules package</a></li>
+          <li class="breadcrumb-item"><a href="lib.modules.core.html">lib.modules.core package</a></li>
+          <li class="breadcrumb-item"><a href="lib.modules.core.codec.html">lib.modules.core.codec package</a></li>
+      <li class="breadcrumb-item active">lib.modules.core.codec.heatmap_utils module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/lib.modules.core.codec.heatmap_utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-lib.modules.core.codec.heatmap_utils">
+<span id="lib-modules-core-codec-heatmap-utils-module"></span><h1>lib.modules.core.codec.heatmap_utils module<a class="headerlink" href="#module-lib.modules.core.codec.heatmap_utils" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.modules.core.codec.heatmap_utils.gaussian_blur">
+<span class="sig-prename descclassname"><span class="pre">lib.modules.core.codec.heatmap_utils.</span></span><span class="sig-name descname"><span class="pre">gaussian_blur</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">heatmaps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">11</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/lib/modules/core/codec/heatmap_utils.html#gaussian_blur"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.heatmap_utils.gaussian_blur" title="Permalink to this definition"></a></dt>
+<dd><p>Modulate heatmap distribution with Gaussian.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>num_keypoints: K</p></li>
+<li><p>heatmap height: H</p></li>
+<li><p>heatmap width: W</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>heatmaps</strong> (<em>np.ndarray</em><em>[</em><em>K</em><em>, </em><em>H</em><em>, </em><em>W</em><em>]</em>) – model predicted heatmaps.</p></li>
+<li><p><strong>kernel</strong> (<em>int</em>) – Gaussian kernel size (K) for modulation, which should
+match the heatmap gaussian sigma when training.
+K=17 for sigma=3 and k=11 for sigma=2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modulated heatmap distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray ([K, H, W])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.modules.core.codec.heatmap_utils.generate_gaussian_heatmaps">
+<span class="sig-prename descclassname"><span class="pre">lib.modules.core.codec.heatmap_utils.</span></span><span class="sig-name descname"><span class="pre">generate_gaussian_heatmaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">heatmap_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keypoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keypoints_visible</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lib/modules/core/codec/heatmap_utils.html#generate_gaussian_heatmaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.heatmap_utils.generate_gaussian_heatmaps" title="Permalink to this definition"></a></dt>
+<dd><p>Generate gaussian heatmaps of keypoints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>heatmap_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Heatmap size in [W, H]</p></li>
+<li><p><strong>keypoints</strong> (<em>np.ndarray</em>) – Keypoint coordinates in shape (N, K, D)</p></li>
+<li><p><strong>keypoints_visible</strong> (<em>np.ndarray</em>) – Keypoint visibilities in shape
+(N, K)</p></li>
+<li><p><strong>sigma</strong> (<em>float</em><em> or </em><em>List</em><em>[</em><em>float</em><em>]</em>) – A list of sigma values of the Gaussian
+heatmap for each instance. If sigma is given as a single float
+value, it will be expanded into a tuple</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><dl class="simple">
+<dt>heatmaps (np.ndarray): The generated heatmap in shape</dt><dd><p>(K, H, W) where [W, H] is the <cite>heatmap_size</cite></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>keypoint_weights (np.ndarray): The target weights in shape</dt><dd><p>(N, K)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.modules.core.codec.heatmap_utils.generate_unbiased_gaussian_heatmaps">
+<span class="sig-prename descclassname"><span class="pre">lib.modules.core.codec.heatmap_utils.</span></span><span class="sig-name descname"><span class="pre">generate_unbiased_gaussian_heatmaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">heatmap_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keypoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keypoints_visible</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lib/modules/core/codec/heatmap_utils.html#generate_unbiased_gaussian_heatmaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.heatmap_utils.generate_unbiased_gaussian_heatmaps" title="Permalink to this definition"></a></dt>
+<dd><p>Generate gaussian heatmaps of keypoints using <a class="reference external" href="https://arxiv.org/abs/1910.06278">Dark Pose</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>heatmap_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Heatmap size in [W, H]</p></li>
+<li><p><strong>keypoints</strong> (<em>np.ndarray</em>) – Keypoint coordinates in shape (N, K, D)</p></li>
+<li><p><strong>keypoints_visible</strong> (<em>np.ndarray</em>) – Keypoint visibilities in shape
+(N, K)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><dl class="simple">
+<dt>heatmaps (np.ndarray): The generated heatmap in shape</dt><dd><p>(K, H, W) where [W, H] is the <cite>heatmap_size</cite></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>keypoint_weights (np.ndarray): The target weights in shape</dt><dd><p>(N, K)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.modules.core.codec.heatmap_utils.get_heatmap_maximum">
+<span class="sig-prename descclassname"><span class="pre">lib.modules.core.codec.heatmap_utils.</span></span><span class="sig-name descname"><span class="pre">get_heatmap_maximum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">heatmaps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lib/modules/core/codec/heatmap_utils.html#get_heatmap_maximum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.heatmap_utils.get_heatmap_maximum" title="Permalink to this definition"></a></dt>
+<dd><p>Get maximum response location and value from heatmaps.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>batch_size: B
+num_keypoints: K
+heatmap height: H
+heatmap width: W</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>heatmaps</strong> (<em>np.ndarray</em>) – Heatmaps in shape (K, H, W) or (B, K, H, W)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><dl class="simple">
+<dt>locs (np.ndarray): locations of maximum heatmap responses in shape</dt><dd><p>(K, 2) or (B, K, 2)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>vals (np.ndarray): values of maximum heatmap responses in shape</dt><dd><p>(K,) or (B, K)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.modules.core.codec.heatmap_utils.refine_keypoints">
+<span class="sig-prename descclassname"><span class="pre">lib.modules.core.codec.heatmap_utils.</span></span><span class="sig-name descname"><span class="pre">refine_keypoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heatmaps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/lib/modules/core/codec/heatmap_utils.html#refine_keypoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.heatmap_utils.refine_keypoints" title="Permalink to this definition"></a></dt>
+<dd><p>Refine keypoint predictions by moving from the maximum towards the
+second maximum by 0.25 pixel. The operation is in-place.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>instance number: N</p></li>
+<li><p>keypoint number: K</p></li>
+<li><p>keypoint dimension: D</p></li>
+<li><p>heatmap size: [W, H]</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keypoints</strong> (<em>np.ndarray</em>) – The keypoint coordinates in shape (N, K, D)</p></li>
+<li><p><strong>heatmaps</strong> (<em>np.ndarray</em>) – The heatmaps in shape (K, H, W)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Refine keypoint coordinates in shape (N, K, D)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.modules.core.codec.heatmap_utils.refine_keypoints_dark">
+<span class="sig-prename descclassname"><span class="pre">lib.modules.core.codec.heatmap_utils.</span></span><span class="sig-name descname"><span class="pre">refine_keypoints_dark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heatmaps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blur_kernel_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/lib/modules/core/codec/heatmap_utils.html#refine_keypoints_dark"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.heatmap_utils.refine_keypoints_dark" title="Permalink to this definition"></a></dt>
+<dd><p>Refine keypoint predictions using distribution aware coordinate
+decoding. See <a class="reference external" href="https://arxiv.org/abs/1910.06278">Dark Pose</a> for details. The operation is in-place.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>instance number: N</p></li>
+<li><p>keypoint number: K</p></li>
+<li><p>keypoint dimension: D</p></li>
+<li><p>heatmap size: [W, H]</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keypoints</strong> (<em>np.ndarray</em>) – The keypoint coordinates in shape (N, K, D)</p></li>
+<li><p><strong>heatmaps</strong> (<em>np.ndarray</em>) – The heatmaps in shape (K, H, W)</p></li>
+<li><p><strong>blur_kernel_size</strong> (<em>int</em>) – The Gaussian blur kernel size of the heatmap
+modulation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Refine keypoint coordinates in shape (N, K, D)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.modules.core.codec.heatmap_utils.refine_keypoints_dark_udp">
+<span class="sig-prename descclassname"><span class="pre">lib.modules.core.codec.heatmap_utils.</span></span><span class="sig-name descname"><span class="pre">refine_keypoints_dark_udp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heatmaps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blur_kernel_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/lib/modules/core/codec/heatmap_utils.html#refine_keypoints_dark_udp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.heatmap_utils.refine_keypoints_dark_udp" title="Permalink to this definition"></a></dt>
+<dd><p>Refine keypoint predictions using distribution aware coordinate decoding
+for UDP. See <a class="reference external" href="https://arxiv.org/abs/1911.07524">UDP</a> for details. The operation is in-place.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>instance number: N</p></li>
+<li><p>keypoint number: K</p></li>
+<li><p>keypoint dimension: D</p></li>
+<li><p>heatmap size: [W, H]</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keypoints</strong> (<em>np.ndarray</em>) – The keypoint coordinates in shape (N, K, D)</p></li>
+<li><p><strong>heatmaps</strong> (<em>np.ndarray</em>) – The heatmaps in shape (K, H, W)</p></li>
+<li><p><strong>blur_kernel_size</strong> (<em>int</em>) – The Gaussian blur kernel size of the heatmap
+modulation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Refine keypoint coordinates in shape (N, K, D)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lib.modules.core.codec.html" class="btn btn-neutral float-left" title="lib.modules.core.codec package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lib.modules.core.codec.msra_heatmap.html" class="btn btn-neutral float-right" title="lib.modules.core.codec.msra_heatmap module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andy Tam Yiu Chau.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

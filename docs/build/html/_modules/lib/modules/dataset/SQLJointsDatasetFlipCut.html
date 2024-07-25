@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lib.modules.dataset.SQLJointsDatasetFlipCut &mdash; Posture Experiment 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Posture Experiment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_organization.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code_running.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments.html">Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference_index.html">Reference Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Posture Experiment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">lib.modules.dataset.SQLJointsDatasetFlipCut</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for lib.modules.dataset.SQLJointsDatasetFlipCut</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">lib.modules.dataset.common</span> <span class="kn">import</span> <span class="n">ResolveImage</span>
+<span class="kn">from</span> <span class="nn">lib.modules.dataset.JointsDataset</span> <span class="kn">import</span> <span class="n">JointsDataset</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span><span class="p">,</span> <span class="n">randrange</span><span class="p">,</span> <span class="n">seed</span>
+
+<span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="kn">from</span> <span class="nn">configs.dataset_config</span> <span class="kn">import</span> <span class="n">FLIPCUT_AUGMENTED_DB_CONNECTION_STRING</span>
+
+
+<div class="viewcode-block" id="SQLJointsDataset"><a class="viewcode-back" href="../../../../api/lib.modules.dataset.SQLJointsDatasetFlipCut.html#lib.modules.dataset.SQLJointsDatasetFlipCut.SQLJointsDataset">[docs]</a><span class="k">class</span> <span class="nc">SQLJointsDataset</span><span class="p">(</span><span class="n">JointsDataset</span><span class="p">):</span>
+    <span class="n">DB_CONNECTION_STRING</span> <span class="o">=</span> <span class="n">FLIPCUT_AUGMENTED_DB_CONNECTION_STRING</span>
+    <span class="n">TABLE_NAME</span> <span class="o">=</span> <span class="s2">&quot;annotations&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">is_train</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">mixed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">all_quilt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">test</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">flipcut_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_train</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_train</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subset</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
+        <span class="k">elif</span> <span class="n">test</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subset</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subset</span> <span class="o">=</span> <span class="s2">&quot;val&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flip_quilt_only</span> <span class="o">=</span> <span class="n">flipcut_only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_joints</span> <span class="o">=</span> <span class="mi">18</span>
+        <span class="n">indexs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sql_indexs</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initDB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subset</span><span class="p">,</span> <span class="n">indexs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel_std</span> <span class="o">=</span> <span class="mi">200</span>  <span class="c1"># 200 ?? TBD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span> <span class="o">=</span> <span class="s2">&quot;sql&quot;</span>
+        <span class="c1"># image_widt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># cfg.MODEL.IMAGE_SIZE[0] # TBD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># cfg.MODEL.IMAGE_SIZE[1] #TBD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_width</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_db</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=&gt; load </span><span class="si">{}</span><span class="s2"> samples&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">)))</span>
+        <span class="n">image_database</span> <span class="o">=</span> <span class="s2">&quot;depth_images&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_query_string</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SELECT a.depth_array FROM </span><span class="si">{</span><span class="n">image_database</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; as a WHERE a.`index`=</span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_indexer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">mixed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">probability</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">probability</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_quilt</span> <span class="o">=</span> <span class="n">all_quilt</span>
+
+    <span class="k">def</span> <span class="nf">_initDB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset</span><span class="p">,</span> <span class="n">indexs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_connection_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DB_CONNECTION_STRING</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TABLE_NAME</span>
+        <span class="n">flip_quilt_selector</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot; AND effect LIKE &#39;%Covered%&#39; &quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip_quilt_only</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT &quot;</span>
+            <span class="o">+</span> <span class="n">indexs</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; FROM </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> AS a WHERE a.subset=&#39;</span><span class="si">{</span><span class="n">subset</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="o">+</span> <span class="n">flip_quilt_selector</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db_connection_string</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SELECT * FROM </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> AS a WHERE a.subset=&#39;</span><span class="si">{</span><span class="n">subset</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+            <span class="o">+</span> <span class="n">flip_quilt_selector</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db_connection_string</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_sql_indexs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">num_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_joints</span>
+        <span class="n">indexs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;a.`index`&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_index</span><span class="p">):</span>
+            <span class="n">indexs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;a.`</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_x`, a.`</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_y`&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">indexs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_box2cs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">box</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xywh2cs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_get_posture_lookup_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lookup_table</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotations_df</span><span class="p">)):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="c1"># print(row)</span>
+            <span class="n">lookup_table</span><span class="p">[(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;source_file&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;posture&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;effect&quot;</span><span class="p">])]</span> <span class="o">=</span> <span class="n">idx</span>
+        <span class="k">return</span> <span class="n">lookup_table</span>
+
+    <span class="k">def</span> <span class="nf">_get_numpy_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">indexer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sql_image_connections</span><span class="p">()</span>
+        <span class="c1"># print(self.annotations_df.iloc[idx])</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">source_file</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;source_file&quot;</span><span class="p">]</span>
+        <span class="n">posture</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;posture&quot;</span><span class="p">]</span>
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;effect&quot;</span><span class="p">]</span>
+        <span class="c1"># print(self.annotations_df.iloc[idx])</span>
+        <span class="c1"># if self.subset == &quot;test&quot; or random() &gt; self.probability:</span>
+        <span class="n">data_numpy</span> <span class="o">=</span> <span class="n">indexer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotations_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     # print(idx)</span>
+        <span class="c1">#     data_numpy1 = indexer(self.annotations_df.iloc[idx])</span>
+        <span class="c1">#     random_effect = str(randrange(1, 5))</span>
+        <span class="c1">#     # print(self._get_posture_lookup_dict)</span>
+        <span class="c1">#     random_idx = self._get_posture_lookup_dict[</span>
+        <span class="c1">#         (source_file, posture, random_effect)</span>
+        <span class="c1">#     ]</span>
+        <span class="c1">#     data_numpy2 = indexer(self.annotations_df.iloc[random_idx])</span>
+        <span class="c1">#     merge_probability = random()</span>
+        <span class="c1">#     data_numpy = (</span>
+        <span class="c1">#         merge_probability * data_numpy1 + (1 - merge_probability) * data_numpy2</span>
+        <span class="c1">#     )</span>
+        <span class="k">return</span> <span class="n">data_numpy</span>
+
+    <span class="k">def</span> <span class="nf">_get_sql_image_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># cache getter</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_indexer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_indexer</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_query_string</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_connection_string</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_indexer</span> <span class="o">=</span> <span class="n">ResolveImage</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">image_query_string</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_connection_string</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>  <span class="c1"># (192,256)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_indexer</span>
+
+    <span class="k">def</span> <span class="nf">_xywh2cs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">w</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="mf">0.5</span>
+
+        <span class="c1"># fix_aspeck ratio</span>
+        <span class="k">if</span> <span class="n">w</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span> <span class="o">*</span> <span class="n">h</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span>
+        <span class="k">elif</span> <span class="n">w</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span> <span class="o">*</span> <span class="n">h</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">w</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_std</span><span class="p">,</span> <span class="n">h</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_std</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="mf">1.25</span>
+
+        <span class="k">return</span> <span class="n">center</span><span class="p">,</span> <span class="n">scale</span>
+
+    <span class="k">def</span> <span class="nf">_get_db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="c1"># print(dataset.pose)</span>
+        <span class="n">indexs</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># print(indexs)</span>
+        <span class="n">joints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:])</span>
+        <span class="c1"># remark xs,ys swaped due to upright</span>
+        <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">joints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">joints</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">],</span>
+        <span class="p">)</span>  <span class="c1"># TODO: check if it is the case OR place assertion</span>
+        <span class="n">zeros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+        <span class="n">joints_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">zeros</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># to be determined for visibility</span>
+        <span class="n">_vis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">((</span><span class="n">xs</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ys</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">))</span>
+        <span class="n">joints_3d_vis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">_vis</span><span class="p">,</span> <span class="n">_vis</span><span class="p">,</span> <span class="n">zeros</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># boudning box by joint location</span>
+        <span class="c1"># warn x,y swapped due?</span>
+        <span class="n">xs_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ys_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">xs_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ys_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">bboxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xs_min</span><span class="p">,</span> <span class="n">ys_min</span><span class="p">,</span> <span class="n">xs_max</span> <span class="o">-</span> <span class="n">xs_min</span><span class="p">,</span> <span class="n">ys_max</span> <span class="o">-</span> <span class="n">ys_min</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># posture group mapping</span>
+
+        <span class="n">rec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">pose</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">indexs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">center</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_box2cs</span><span class="p">(</span><span class="n">bboxs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span>  <span class="c1"># self.image_path_from_index(index),</span>
+                    <span class="s2">&quot;center&quot;</span><span class="p">:</span> <span class="n">center</span><span class="p">,</span>
+                    <span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="n">scale</span><span class="p">,</span>
+                    <span class="s2">&quot;joints_3d&quot;</span><span class="p">:</span> <span class="n">joints_3d</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="s2">&quot;joints_3d_vis&quot;</span><span class="p">:</span> <span class="n">joints_3d_vis</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;imgnum&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># ?</span>
+                    <span class="c1"># missing score</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="c1"># print(rec[:-1])</span>
+        <span class="k">return</span> <span class="n">rec</span>
+
+<div class="viewcode-block" id="SQLJointsDataset.evaluate"><a class="viewcode-back" href="../../../../api/lib.modules.dataset.SQLJointsDatasetFlipCut.html#lib.modules.dataset.SQLJointsDatasetFlipCut.SQLJointsDataset.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_weight</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">posture_groups</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">posture_groups</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">posture_groups</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+        <span class="n">posture_groups</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+        <span class="n">posture_groups</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+        <span class="n">flip_symbol</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;o&quot;</span><span class="p">:</span> <span class="s2">&quot;g&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;g&quot;</span><span class="p">:</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">posture_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations_df</span><span class="o">.</span><span class="n">posture</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">effect_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations_df</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;effect&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">effect_symbol</span>
+        <span class="k">if</span> <span class="s2">&quot;flipped&quot;</span> <span class="ow">in</span> <span class="n">meta</span> <span class="ow">and</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;flipped&quot;</span><span class="p">]:</span>
+            <span class="n">posture_symbol</span> <span class="o">=</span> <span class="n">flip_symbol</span><span class="p">[</span><span class="n">posture_symbol</span><span class="p">]</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;posture&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">posture_groups</span><span class="p">[</span><span class="mi">7</span><span class="p">][</span><span class="n">posture_symbol</span><span class="p">]</span>
+        <span class="nb">input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_weight</span><span class="p">,</span> <span class="n">meta</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Test the dataset&quot;&quot;&quot;</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">SQLJointsDataset</span><span class="p">(</span><span class="n">is_train</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">_get_db</span><span class="p">()</span>
+    <span class="n">ds_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">ds_iter</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+    <span class="c1"># test print joint</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">ds_iter</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">zeros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">18</span><span class="p">):</span>
+        <span class="n">zeros</span> <span class="o">=</span> <span class="n">zeros</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="c1"># plt.imshow(b[i])</span>
+        <span class="c1"># plt.show()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">zeros</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andy Tam Yiu Chau.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

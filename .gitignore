@@ -18,7 +18,7 @@ confusion matrix.txt
 *.txt
 "wrong cases"
 _old_*/
-docs/build
+# docs/build
 docs/source/api/
 docs/source/experiments/
 runs/
@@ -57,3 +57,4 @@ images_/
 old codes/
 16-GradCam/
 13-JointVisualization/
+*.db

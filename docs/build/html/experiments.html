@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experiments &mdash; Posture Experiment 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference Index" href="reference_index.html" />
+    <link rel="prev" title="Get started" href="code_running.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Posture Experiment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="project_organization.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code_running.html">Get started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Experiments</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-experiments">List of experiments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#random-search">1. Random Search</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-search">Running the search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aggregating-the-results">Aggregating the results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-of-the-result">Analysis of the result</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-searching">2. Manual searching</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#runing-the-models">Runing the models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aggregating-the-results-of-manual-search">Aggregating the results of manual search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis">Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pretraining">03. Pretraining</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#weight-transfer">04. Weight transfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#finetuning">05. Finetuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#posture-classification">06. Posture Classification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference_index.html">Reference Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Posture Experiment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Experiments</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/experiments.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="experiments">
+<h1>Experiments<a class="headerlink" href="#experiments" title="Permalink to this heading"></a></h1>
+<section id="list-of-experiments">
+<h2>List of experiments<a class="headerlink" href="#list-of-experiments" title="Permalink to this heading"></a></h2>
+<p>The experiments were run in the following sequences</p>
+<ol class="arabic simple">
+<li><p>Random Search</p></li>
+<li><p>Manual Search</p></li>
+<li><p>Pretrainning</p></li>
+<li><p>Weight Transfers</p></li>
+<li><p>Finetuning</p></li>
+<li><p>Posture Classification training</p></li>
+</ol>
+</section>
+<section id="random-search">
+<h2>1. Random Search<a class="headerlink" href="#random-search" title="Permalink to this heading"></a></h2>
+<section id="running-the-search">
+<h3>Running the search<a class="headerlink" href="#running-the-search" title="Permalink to this heading"></a></h3>
+<div class="highlight-batch notranslate"><div class="highlight"><pre><span></span><span class="k">cd</span> 01-Random_search
+<span class="p">:</span><span class="c1">: Generate the list of random seeds for search</span>
+<span class="k">mkdir</span> runs
+python generate_runs.py
+<span class="p">:</span><span class="c1">: Running the the list of random search</span>
+python -m helper.local_run -f runs -s search.py
+</pre></div>
+</div>
+<p>To make use of multiple gpus, you can split the runs into chunks, put them into individual run folders, and copy back when everything finish.</p>
+</section>
+<section id="aggregating-the-results">
+<h3>Aggregating the results<a class="headerlink" href="#aggregating-the-results" title="Permalink to this heading"></a></h3>
+<p>Each run will generate a log.csv file with a line containing the search parameters and the validation loss result.
+The helper script <code class="docutils literal notranslate"><span class="pre">aggregate_result.py</span></code> is used to aggregate everything into a big <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file for analysis in excel.</p>
+<div class="highlight-batch notranslate"><div class="highlight"><pre><span></span>python aggregate_result.py
+</pre></div>
+</div>
+</section>
+<section id="analysis-of-the-result">
+<h3>Analysis of the result<a class="headerlink" href="#analysis-of-the-result" title="Permalink to this heading"></a></h3>
+<p>In excel, create a table with the .csv file, and filter for <em>good</em> models, which is defined as a threshold, and then plot for each parameters against the performance. The threshold used in this experiment are provided in the paper.
+Update <code class="docutils literal notranslate"><span class="pre">configs.random_seaerch_params.py</span></code> with the best results from this step.</p>
+</section>
+</section>
+<section id="manual-searching">
+<h2>2. Manual searching<a class="headerlink" href="#manual-searching" title="Permalink to this heading"></a></h2>
+<section id="runing-the-models">
+<h3>Runing the models<a class="headerlink" href="#runing-the-models" title="Permalink to this heading"></a></h3>
+<div class="highlight-batch notranslate"><div class="highlight"><pre><span></span><span class="p">:</span><span class="c1">: Starting from root repo</span>
+<span class="k">cd</span> 02-Manual_Search
+<span class="p">:</span><span class="c1">: Generate the list of random seeds for search</span>
+<span class="k">mkdir</span> runs
+python generate_runs.py
+<span class="p">:</span><span class="c1">: Running the the list of random search</span>
+python -m helper.local_run -f runs -s search.py
+</pre></div>
+</div>
+</section>
+<section id="aggregating-the-results-of-manual-search">
+<h3>Aggregating the results of manual search<a class="headerlink" href="#aggregating-the-results-of-manual-search" title="Permalink to this heading"></a></h3>
+<p>See <a class="reference internal" href="#aggregating-the-results"><span class="xref myst">Aggregate result from random search</span></a>.</p>
+</section>
+<section id="analysis">
+<h3>Analysis<a class="headerlink" href="#analysis" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="pretraining">
+<h2>03. Pretraining<a class="headerlink" href="#pretraining" title="Permalink to this heading"></a></h2>
+<p>Patch mmpose with our custom data.</p>
+<div class="highlight-batch notranslate"><div class="highlight"><pre><span></span><span class="k">cd</span> 03-Pretraining
+git clone https://github.com/open-mmlab/mmpose.git
+rclone copy patched_codes/ mmpose
+</pre></div>
+</div>
+<p>Obtain and prepare the <em>COCO whole-body dataset</em> according to <a class="reference external" href="https://mmpose.readthedocs.io/en/latest/dataset_zoo/2d_wholebody_keypoint.html#coco-wholebody">MMPose’s instruction</a>.</p>
+</section>
+<section id="weight-transfer">
+<h2>04. Weight transfer<a class="headerlink" href="#weight-transfer" title="Permalink to this heading"></a></h2>
+<p>Copy the saved weight from MMPose checkpoint folder <code class="docutils literal notranslate"><span class="pre">{folder}</span></code> to <code class="docutils literal notranslate"><span class="pre">04--Weight_transfer</span></code></p>
+<div class="highlight-batch notranslate"><div class="highlight"><pre><span></span><span class="k">cd</span> 04-Weight_Transfer
+<span class="p">:</span><span class="c1">: Generate the checkpoint base </span>
+python generate_checkpoint_template.py
+<span class="p">:</span><span class="c1">: Transfer the checkpoint</span>
+python transfer_weight.py best_coco-wholebody_AP_epoch_*.pth template_checkpoint.pth merged_model.pth 
+</pre></div>
+</div>
+</section>
+<section id="finetuning">
+<h2>05. Finetuning<a class="headerlink" href="#finetuning" title="Permalink to this heading"></a></h2>
+<div class="highlight-batch notranslate"><div class="highlight"><pre><span></span><span class="p">:</span><span class="c1">: Copy the transfered weight to 05-Finetuning folder </span>
+<span class="k">copy</span> 04-Weight_Transfer/merged_model.pth 05-Finetuning/merged_model.pth
+<span class="p">:</span><span class="c1">: Run the training</span>
+<span class="k">cd</span> 05-Finetuning
+python finetune_parameterized_by_config.py
+</pre></div>
+</div>
+<p>It will produce two weight file in <code class="docutils literal notranslate"><span class="pre">05-Finetuning\log\SACCPA_sample\05-Finetuning\lightning_logs\version_0\checkpoints</span></code>
+Copy the file <code class="docutils literal notranslate"><span class="pre">best-epoch=*-val_loss=*.ckpt</span></code> to file <code class="docutils literal notranslate"><span class="pre">06-Posture_Classification\runs\best-epoch.ckpt</span></code>  .</p>
+</section>
+<section id="posture-classification">
+<h2>06. Posture Classification<a class="headerlink" href="#posture-classification" title="Permalink to this heading"></a></h2>
+<div class="highlight-batch notranslate"><div class="highlight"><pre><span></span><span class="p">:</span><span class="c1">: Generate the runs for all classification models being tried.</span>
+<span class="k">cd</span> 06-Posture_Classification
+python generate_runs.py
+<span class="p">:</span><span class="c1">: Running the the list of classification models</span>
+python -m helper.local_run -f runs -s finetune_classification.py
+
+<span class="p">:</span><span class="c1">: After finishing the download, run </span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="code_running.html" class="btn btn-neutral float-left" title="Get started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reference_index.html" class="btn btn-neutral float-right" title="Reference Index" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andy Tam Yiu Chau.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

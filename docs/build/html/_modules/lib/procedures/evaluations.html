@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lib.procedures.evaluations &mdash; Posture Experiment 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Posture Experiment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_organization.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code_running.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiments.html">Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference_index.html">Reference Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Posture Experiment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">lib.procedures.evaluations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for lib.procedures.evaluations</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">cycle</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">auc</span><span class="p">,</span>
+    <span class="n">classification_report</span><span class="p">,</span>
+    <span class="n">confusion_matrix</span><span class="p">,</span>
+    <span class="n">f1_score</span><span class="p">,</span>
+    <span class="n">roc_auc_score</span><span class="p">,</span>
+    <span class="n">roc_curve</span><span class="p">,</span>
+    <span class="n">top_k_accuracy_score</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+
+<div class="viewcode-block" id="write_log"><a class="viewcode-back" href="../../../api/lib.procedures.evaluations.html#lib.procedures.evaluations.write_log">[docs]</a><span class="k">def</span> <span class="nf">write_log</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">log_file</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">log_file</span><span class="p">):</span>
+        <span class="n">write_header</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">write_header</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_file</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">write_header</span><span class="p">:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="update_log"><a class="viewcode-back" href="../../../api/lib.procedures.evaluations.html#lib.procedures.evaluations.update_log">[docs]</a><span class="k">def</span> <span class="nf">update_log</span><span class="p">(</span><span class="n">PARAM_NAME</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">params</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PARAM_NAME</span></div>
+
+
+<div class="viewcode-block" id="save_roc"><a class="viewcode-back" href="../../../api/lib.procedures.evaluations.html#lib.procedures.evaluations.save_roc">[docs]</a><span class="k">def</span> <span class="nf">save_roc</span><span class="p">(</span><span class="n">ly</span><span class="p">,</span> <span class="n">ly_weight</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interp</span>
+
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">ly</span>  <span class="c1"># np.array(y_true)</span>
+    <span class="n">classes_to_plot</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+    <span class="n">probas</span> <span class="o">=</span> <span class="n">ly_weight</span>
+    <span class="n">classes_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;supine&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;right log&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;right fetal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;left log&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;left fetal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prone right&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prone left&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">classes_to_plot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">classes_to_plot</span> <span class="o">=</span> <span class="n">classes</span>
+
+    <span class="n">fpr_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">tpr_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">indices_to_plot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">classes_to_plot</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">to_plot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices_to_plot</span><span class="p">):</span>
+        <span class="n">fpr_dict</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr_dict</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span>
+            <span class="n">y_true</span><span class="p">,</span> <span class="n">probas</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">pos_label</span><span class="o">=</span><span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Compute macro-average ROC curve and ROC area</span>
+    <span class="c1"># First aggregate all false positive rates</span>
+    <span class="n">all_fpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">fpr_dict</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">))]))</span>
+
+    <span class="c1"># Then interpolate all ROC curves at this points</span>
+    <span class="n">mean_tpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">all_fpr</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)):</span>
+        <span class="n">mean_tpr</span> <span class="o">+=</span> <span class="n">interp</span><span class="p">(</span><span class="n">all_fpr</span><span class="p">,</span> <span class="n">fpr_dict</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr_dict</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># Finally average it and compute AUC</span>
+    <span class="n">mean_tpr</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+    <span class="c1"># all_fpr, mean_tpr</span>
+
+    <span class="k">return</span> <span class="n">all_fpr</span><span class="p">,</span> <span class="n">mean_tpr</span></div>
+
+
+<div class="viewcode-block" id="save_auc"><a class="viewcode-back" href="../../../api/lib.procedures.evaluations.html#lib.procedures.evaluations.save_auc">[docs]</a><span class="k">def</span> <span class="nf">save_auc</span><span class="p">(</span><span class="n">RESULT_DIR</span><span class="p">,</span> <span class="n">ly</span><span class="p">,</span> <span class="n">ly_weight</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">scikitplot</span> <span class="k">as</span> <span class="nn">skplt</span>
+
+    <span class="c1"># scikitplot_plot_roc(ly, ly_weight)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">RESULT_DIR</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">all_fpr</span><span class="p">,</span> <span class="n">mean_tpr</span> <span class="o">=</span> <span class="n">save_roc</span><span class="p">(</span><span class="n">ly</span><span class="p">,</span> <span class="n">ly_weight</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESULT_DIR</span><span class="si">}</span><span class="s2">/all_fpr.npy&quot;</span><span class="p">,</span> <span class="n">all_fpr</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESULT_DIR</span><span class="si">}</span><span class="s2">/mean_tpr.npy&quot;</span><span class="p">,</span> <span class="n">mean_tpr</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write"><a class="viewcode-back" href="../../../api/lib.procedures.evaluations.html#lib.procedures.evaluations.write">[docs]</a><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="evaluate_cls"><a class="viewcode-back" href="../../../api/lib.procedures.evaluations.html#lib.procedures.evaluations.evaluate_cls">[docs]</a><span class="k">def</span> <span class="nf">evaluate_cls</span><span class="p">(</span>
+    <span class="n">ALL_CONDITIONS_STRING</span><span class="p">,</span> <span class="n">RESULT_DIR</span><span class="p">,</span> <span class="n">ly</span><span class="p">,</span> <span class="n">ly_hat</span><span class="p">,</span> <span class="n">image_ids</span><span class="p">,</span> <span class="n">ly_weight</span><span class="p">,</span> <span class="n">input_storage</span>
+<span class="p">):</span>
+    <span class="n">posture_map</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;supine&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;right log&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;right fetal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;left log&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;left fetal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prone right&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prone left&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">cfm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">ly</span><span class="p">,</span> <span class="n">ly_hat</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESULT_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">ALL_CONDITIONS_STRING</span><span class="si">}</span><span class="s2">_confusion matrix.txt&quot;</span><span class="p">,</span> <span class="n">cfm</span><span class="p">)</span>
+    <span class="n">cr</span> <span class="o">=</span> <span class="n">classification_report</span><span class="p">(</span><span class="n">ly</span><span class="p">,</span> <span class="n">ly_hat</span><span class="p">,</span> <span class="n">target_names</span><span class="o">=</span><span class="n">posture_map</span><span class="p">,</span> <span class="n">digits</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESULT_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">ALL_CONDITIONS_STRING</span><span class="si">}</span><span class="s2">_classification report.txt&quot;</span><span class="p">,</span> <span class="n">cr</span><span class="p">)</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">ly</span><span class="p">,</span> <span class="n">ly_hat</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;macro&quot;</span><span class="p">)</span>
+    <span class="c1"># print(ly_weight.shape,ly)</span>
+    <span class="n">auc_score</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">ly</span><span class="p">,</span> <span class="n">ly_weight</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s2">&quot;ovo&quot;</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;macro&quot;</span><span class="p">)</span>
+    <span class="n">top2</span> <span class="o">=</span> <span class="n">top_k_accuracy_score</span><span class="p">(</span><span class="n">ly</span><span class="p">,</span> <span class="n">ly_weight</span><span class="p">)</span>
+    <span class="n">result_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;f1:</span><span class="si">{</span><span class="n">f1</span><span class="si">}</span><span class="s2">, auc:</span><span class="si">{</span><span class="n">auc_score</span><span class="si">}</span><span class="s2">, top2:</span><span class="si">{</span><span class="n">top2</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESULT_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">ALL_CONDITIONS_STRING</span><span class="si">}</span><span class="s2">_aux.txt&quot;</span><span class="p">,</span> <span class="n">result_string</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result_string</span><span class="p">)</span>
+    <span class="n">save_auc</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESULT_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">ALL_CONDITIONS_STRING</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ly</span><span class="p">,</span> <span class="n">ly_weight</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="nb">filter</span> <span class="o">=</span> <span class="n">ly</span> <span class="o">!=</span> <span class="n">ly_hat</span>
+    <span class="n">dataset_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ly</span><span class="p">)))[</span><span class="nb">filter</span><span class="p">]</span>
+    <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">truth</span><span class="p">,</span> <span class="n">nth</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+        <span class="n">image_ids</span><span class="p">[</span><span class="nb">filter</span><span class="p">],</span>
+        <span class="n">ly_hat</span><span class="p">[</span><span class="nb">filter</span><span class="p">],</span>
+        <span class="n">ly</span><span class="p">[</span><span class="nb">filter</span><span class="p">],</span>
+        <span class="n">dataset_positions</span><span class="p">,</span>
+        <span class="n">input_storage</span><span class="p">[</span><span class="nb">filter</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;id:</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2"> predcit:</span><span class="si">{</span><span class="n">posture_map</span><span class="p">[</span><span class="n">predict</span><span class="p">]</span><span class="si">}</span><span class="s2"> truth:</span><span class="si">{</span><span class="n">posture_map</span><span class="p">[</span><span class="n">truth</span><span class="p">]</span><span class="si">}</span><span class="s2"> nth:</span><span class="si">{</span><span class="n">nth</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># show_id(test_dataset,nth)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESULT_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">results</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESULT_DIR</span><span class="si">}</span><span class="s2">/wrong cases.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="inference_model_classification_coordinate"><a class="viewcode-back" href="../../../api/lib.procedures.evaluations.html#lib.procedures.evaluations.inference_model_classification_coordinate">[docs]</a><span class="k">def</span> <span class="nf">inference_model_classification_coordinate</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="n">softmax</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ly</span><span class="p">,</span> <span class="n">ly_hat</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">image_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ly_weight</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">input_storage</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">test_dataloader</span><span class="p">:</span>
+        <span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_weight</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;joints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;joints&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">input</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="n">target_weight</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="n">meta</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_batch_output</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>  <span class="c1"># .detach()</span>
+        <span class="n">classify</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;classify&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">classify</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="n">classify</span> <span class="o">=</span> <span class="n">classify</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">7</span><span class="p">]</span>  <span class="c1"># fix num_class</span>
+        <span class="n">classify</span> <span class="o">=</span> <span class="n">softmax</span><span class="p">(</span><span class="n">classify</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;posture&quot;</span><span class="p">]</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="p">(</span><span class="n">classify</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="n">ly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">ly_hat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">classify</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="p">)</span>  <span class="c1"># classify.argmax(dim=-1).cpu().numpy())</span>
+        <span class="n">image_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">ly_weight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classify</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">input_storage</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+
+    <span class="n">ly</span><span class="p">,</span> <span class="n">ly_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">ly</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">ly_hat</span><span class="p">)</span>
+    <span class="n">image_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">image_ids</span><span class="p">)</span>
+    <span class="n">ly_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">ly_weight</span><span class="p">)</span>
+    <span class="n">input_storage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">input_storage</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ly</span><span class="p">,</span> <span class="n">ly_hat</span><span class="p">,</span> <span class="n">image_ids</span><span class="p">,</span> <span class="n">ly_weight</span><span class="p">,</span> <span class="n">input_storage</span></div>
+
+
+<div class="viewcode-block" id="inference_clasification_model"><a class="viewcode-back" href="../../../api/lib.procedures.evaluations.html#lib.procedures.evaluations.inference_clasification_model">[docs]</a><span class="k">def</span> <span class="nf">inference_clasification_model</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="n">softmax</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">label2id</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+    <span class="n">id2label</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">label2id</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">posture_map</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;supine&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;right log&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;right fetal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;left log&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;left fetal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prone right&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prone left&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">id2posture</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">posture_map</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">label2id</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">test_dataloader</span><span class="p">:</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_weight</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="sd">&quot;&quot;&quot;The dicionary meta contains the following keys:</span>
+<span class="sd">        &quot;image&quot;: image_file,</span>
+<span class="sd">        &quot;filename&quot;: filename,</span>
+<span class="sd">        &quot;imgnum&quot;: imgnum,</span>
+<span class="sd">        &quot;joints&quot;: joints,</span>
+<span class="sd">        &quot;joints_vis&quot;: joints_vis,</span>
+<span class="sd">        &quot;center&quot;: center,</span>
+<span class="sd">        &quot;scale&quot;: scale,</span>
+<span class="sd">        &quot;rotation&quot;: rotation,</span>
+<span class="sd">        &quot;score&quot;: score,</span>
+<span class="sd">        &quot;flipped&quot;: flipped,</span>
+<span class="sd">        &quot;posture&quot;: posture,        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result_dict</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">input</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="n">target_weight</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="n">meta</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_batch_output</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>  <span class="c1"># .detach()</span>
+        <span class="n">classify</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;classify&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">classify</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="n">classify</span> <span class="o">=</span> <span class="n">classify</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">7</span><span class="p">]</span>  <span class="c1"># fix num_class</span>
+
+        <span class="n">classify</span> <span class="o">=</span> <span class="n">softmax</span><span class="p">(</span><span class="n">classify</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;class_result&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">classify</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andy Tam Yiu Chau.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

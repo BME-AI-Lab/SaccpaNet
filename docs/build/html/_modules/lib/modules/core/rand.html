@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lib.modules.core.rand &mdash; Posture Experiment 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Posture Experiment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_organization.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code_running.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../experiments.html">Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference_index.html">Reference Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Posture Experiment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">lib.modules.core.rand</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for lib.modules.core.rand</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (c) Facebook, Inc. and its affiliates.</span>
+<span class="c1">#</span>
+<span class="c1"># This source code is licensed under the MIT license found in the</span>
+<span class="c1"># LICENSE file in the root directory of this source tree.</span>
+
+<span class="sd">&quot;&quot;&quot;Functions for sampling in the closed interval [low, high] quantized by q.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="quantize"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.quantize">[docs]</a><span class="k">def</span> <span class="nf">quantize</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Quantizes f to be divisible by q and have q&#39;s type.&quot;&quot;&quot;</span>
+    <span class="n">quantized</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">op</span><span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="n">q</span><span class="p">))</span> <span class="o">*</span> <span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">q</span><span class="p">)(</span><span class="n">quantized</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="uniform"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.uniform">[docs]</a><span class="k">def</span> <span class="nf">uniform</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Samples uniform value from [low, high] quantized to q.&quot;&quot;&quot;</span>
+    <span class="c1"># Samples f in [l, h+q) then quantizes f to [l, h] via floor()</span>
+    <span class="c1"># This is equivalent to sampling f in (l-q, h] then quantizing via ceil()</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">+</span> <span class="n">q</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">quantize</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log_uniform"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.log_uniform">[docs]</a><span class="k">def</span> <span class="nf">log_uniform</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Samples log uniform value from [low, high] quantized to q.&quot;&quot;&quot;</span>
+    <span class="c1"># Samples f in (l-q*, h] then quantizes f to [l, h] via ceil(), where q*=min(q,l/2)</span>
+    <span class="c1"># This is NOT equivalent to sampling f in [l, h-q) then quantizing via floor()</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">high</span><span class="p">)),</span> <span class="o">-</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">low</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">low</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)))))</span>
+    <span class="k">return</span> <span class="n">quantize</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="power2_uniform"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.power2_uniform">[docs]</a><span class="k">def</span> <span class="nf">power2_uniform</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Samples uniform powers of 2 from [low, high] quantized to q.&quot;&quot;&quot;</span>
+    <span class="c1"># Samples f2 in [l2, h2+1) then quantizes f2 to [l2, h2] via floor()</span>
+    <span class="n">f2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">low</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">high</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">quantize</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">f2</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="power2_or_log_uniform"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.power2_or_log_uniform">[docs]</a><span class="k">def</span> <span class="nf">power2_or_log_uniform</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Samples uniform powers of 2 or values divisible by q from [low, high].&quot;&quot;&quot;</span>
+    <span class="c1"># The overall CDF is log-linear because range in log_uniform is (q/2, high]</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">q</span><span class="p">)(</span><span class="n">power2_uniform</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">low</span><span class="p">))</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">log_uniform</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">q</span><span class="p">),</span> <span class="n">high</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span> <span class="k">if</span> <span class="n">f</span> <span class="o">&gt;=</span> <span class="n">q</span> <span class="k">else</span> <span class="n">f</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+
+<div class="viewcode-block" id="normal"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.normal">[docs]</a><span class="k">def</span> <span class="nf">normal</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Samples values from a clipped normal (Gaussian) distribution quantized to q.&quot;&quot;&quot;</span>
+    <span class="c1"># mu/sigma are computed from low/high such that ~99.7% of samples are in range</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="p">(</span><span class="n">low</span> <span class="o">+</span> <span class="n">high</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">low</span> <span class="o">&lt;=</span> <span class="n">f</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">quantize</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log_normal"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.log_normal">[docs]</a><span class="k">def</span> <span class="nf">log_normal</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Samples values from a clipped log-normal distribution quantized to q.&quot;&quot;&quot;</span>
+    <span class="c1"># mu/sigma are computed from low/high such that ~99.7% of samples are in range</span>
+    <span class="n">log_low</span><span class="p">,</span> <span class="n">log_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">low</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">high</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="p">(</span><span class="n">log_low</span> <span class="o">+</span> <span class="n">log_high</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">log_high</span> <span class="o">-</span> <span class="n">log_low</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">low</span> <span class="o">&lt;=</span> <span class="n">f</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">lognormal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">quantize</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">)</span></div>
+
+
+<span class="n">rand_types</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;uniform&quot;</span><span class="p">:</span> <span class="n">uniform</span><span class="p">,</span>
+    <span class="s2">&quot;log_uniform&quot;</span><span class="p">:</span> <span class="n">log_uniform</span><span class="p">,</span>
+    <span class="s2">&quot;power2_uniform&quot;</span><span class="p">:</span> <span class="n">power2_uniform</span><span class="p">,</span>
+    <span class="s2">&quot;power2_or_log_uniform&quot;</span><span class="p">:</span> <span class="n">power2_or_log_uniform</span><span class="p">,</span>
+    <span class="s2">&quot;normal&quot;</span><span class="p">:</span> <span class="n">normal</span><span class="p">,</span>
+    <span class="s2">&quot;log_normal&quot;</span><span class="p">:</span> <span class="n">log_normal</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="validate_rand"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.validate_rand">[docs]</a><span class="k">def</span> <span class="nf">validate_rand</span><span class="p">(</span><span class="n">err_str</span><span class="p">,</span> <span class="n">rand_type</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate parameters to random number generators.&quot;&quot;&quot;</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">(low=</span><span class="si">{}</span><span class="s2">, high=</span><span class="si">{}</span><span class="s2">, q=</span><span class="si">{}</span><span class="s2">) is invalid.&quot;</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="n">err_msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err_str</span><span class="p">,</span> <span class="n">rand_type</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">low_q</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">low</span><span class="p">))</span> <span class="o">%</span> <span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">q</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="n">high_q</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">high</span><span class="p">))</span> <span class="o">%</span> <span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">q</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">high</span><span class="p">),</span> <span class="n">err_msg</span>
+    <span class="k">assert</span> <span class="n">rand_type</span> <span class="ow">in</span> <span class="n">rand_types</span><span class="p">,</span> <span class="n">err_msg</span>
+    <span class="k">assert</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">low</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">,</span> <span class="n">err_msg</span>
+    <span class="k">assert</span> <span class="n">low</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">rand_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="s2">&quot;normal&quot;</span><span class="p">],</span> <span class="n">err_msg</span>
+    <span class="k">assert</span> <span class="n">low_q</span> <span class="ow">and</span> <span class="n">high_q</span> <span class="ow">or</span> <span class="n">rand_type</span> <span class="o">==</span> <span class="s2">&quot;power2_or_log_uniform&quot;</span><span class="p">,</span> <span class="n">err_msg</span>
+    <span class="k">if</span> <span class="n">rand_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;power2_uniform&quot;</span><span class="p">,</span> <span class="s2">&quot;power2_or_log_uniform&quot;</span><span class="p">]:</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">]),</span> <span class="n">err_msg</span></div>
+
+
+<div class="viewcode-block" id="plot_rand_cdf"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.plot_rand_cdf">[docs]</a><span class="k">def</span> <span class="nf">plot_rand_cdf</span><span class="p">(</span><span class="n">rand_type</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Visualizes CDF of rand_fun, resulting CDF should be linear (or log-linear).&quot;&quot;&quot;</span>
+    <span class="n">validate_rand</span><span class="p">(</span><span class="s2">&quot;plot_rand_cdf&quot;</span><span class="p">,</span> <span class="n">rand_type</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="n">rand_types</span><span class="p">[</span><span class="n">rand_type</span><span class="p">](</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+    <span class="n">unique</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">samples</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">min</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">low</span> <span class="ow">and</span> <span class="nb">max</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">,</span> <span class="s2">&quot;Sampled value out of range.&quot;</span>
+    <span class="n">cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">unique</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+    <span class="n">plot_fun</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span> <span class="k">if</span> <span class="n">rand_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="s2">&quot;normal&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span>
+    <span class="n">plot_fun</span><span class="p">(</span><span class="n">unique</span><span class="p">,</span> <span class="n">cdf</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">low</span><span class="p">,</span> <span class="n">low</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;-k&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">high</span><span class="p">,</span> <span class="n">high</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;-k&quot;</span><span class="p">)</span>
+    <span class="n">plot_fun</span><span class="p">([</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">],</span> <span class="p">[</span><span class="n">cdf</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cdf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span> <span class="k">if</span> <span class="s2">&quot;normal&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rand_type</span> <span class="k">else</span> <span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(low=</span><span class="si">{}</span><span class="s2">, high=</span><span class="si">{}</span><span class="s2">, q=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rand_type</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="plot_rand_cdfs"><a class="viewcode-back" href="../../../../api/lib.modules.core.rand.html#lib.modules.core.rand.plot_rand_cdfs">[docs]</a><span class="k">def</span> <span class="nf">plot_rand_cdfs</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Visualize CDFs of selected distributions, for visualization/debugging only.&quot;&quot;&quot;</span>
+    <span class="n">plot_rand_cdf</span><span class="p">(</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plot_rand_cdf</span><span class="p">(</span><span class="s2">&quot;power2_uniform&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plot_rand_cdf</span><span class="p">(</span><span class="s2">&quot;power2_uniform&quot;</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+    <span class="n">plot_rand_cdf</span><span class="p">(</span><span class="s2">&quot;log_uniform&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plot_rand_cdf</span><span class="p">(</span><span class="s2">&quot;log_uniform&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">16.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plot_rand_cdf</span><span class="p">(</span><span class="s2">&quot;power2_or_log_uniform&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">16.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">plot_rand_cdf</span><span class="p">(</span><span class="s2">&quot;power2_or_log_uniform&quot;</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">)</span>
+    <span class="n">plot_rand_cdf</span><span class="p">(</span><span class="s2">&quot;power2_or_log_uniform&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andy Tam Yiu Chau.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

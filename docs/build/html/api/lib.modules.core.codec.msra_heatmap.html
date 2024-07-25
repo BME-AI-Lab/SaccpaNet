@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lib.modules.core.codec.msra_heatmap module &mdash; Posture Experiment 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="lib.modules.core.SpatialArgmax2d module" href="lib.modules.core.SpatialArgmax2d.html" />
+    <link rel="prev" title="lib.modules.core.codec.heatmap_utils module" href="lib.modules.core.codec.heatmap_utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Posture Experiment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../project_organization.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code_running.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiments.html">Experiments</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference_index.html">Reference Index</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="lib.html">lib package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="lib.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="lib.modules.html">lib.modules package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lib.networks.html">lib.networks namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lib.procedures.html">lib.procedures package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Posture Experiment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../reference_index.html">Reference Index</a></li>
+          <li class="breadcrumb-item"><a href="lib.html">lib package</a></li>
+          <li class="breadcrumb-item"><a href="lib.modules.html">lib.modules package</a></li>
+          <li class="breadcrumb-item"><a href="lib.modules.core.html">lib.modules.core package</a></li>
+          <li class="breadcrumb-item"><a href="lib.modules.core.codec.html">lib.modules.core.codec package</a></li>
+      <li class="breadcrumb-item active">lib.modules.core.codec.msra_heatmap module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/lib.modules.core.codec.msra_heatmap.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-lib.modules.core.codec.msra_heatmap">
+<span id="lib-modules-core-codec-msra-heatmap-module"></span><h1>lib.modules.core.codec.msra_heatmap module<a class="headerlink" href="#module-lib.modules.core.codec.msra_heatmap" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="lib.modules.core.codec.msra_heatmap.MSRAHeatmap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lib.modules.core.codec.msra_heatmap.</span></span><span class="sig-name descname"><span class="pre">MSRAHeatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heatmap_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unbiased</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blur_kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lib/modules/core/codec/msra_heatmap.html#MSRAHeatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.msra_heatmap.MSRAHeatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represent keypoints as heatmaps via “MSRA” approach. See the paper:
+<a class="reference external" href="https://arxiv.org/abs/1804.06208">Simple Baselines for Human Pose Estimation and Tracking</a> by Xiao et al
+(2018) for details.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>instance number: N</p></li>
+<li><p>keypoint number: K</p></li>
+<li><p>keypoint dimension: D</p></li>
+<li><p>image size: [w, h]</p></li>
+<li><p>heatmap size: [W, H]</p></li>
+</ul>
+</div>
+<p>Encoded:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>heatmaps (np.ndarray): The generated heatmap in shape (K, H, W)</dt><dd><p>where [W, H] is the <cite>heatmap_size</cite></p>
+</dd>
+</dl>
+</li>
+<li><p>keypoint_weights (np.ndarray): The target weights in shape (N, K)</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_size</strong> (<em>tuple</em>) – Image size in [w, h]</p></li>
+<li><p><strong>heatmap_size</strong> (<em>tuple</em>) – Heatmap size in [W, H]</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – The sigma value of the Gaussian heatmap</p></li>
+<li><p><strong>unbiased</strong> (<em>bool</em>) – Whether use unbiased method (DarkPose) in <code class="docutils literal notranslate"><span class="pre">'msra'</span></code>
+encoding. See <a class="reference external" href="https://arxiv.org/abs/1910.06278">Dark Pose</a> for details. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>blur_kernel_size</strong> (<em>int</em>) – The Gaussian blur kernel size of the heatmap
+modulation in DarkPose. The kernel size and sigma should follow
+the expirical formula <span class="math notranslate nohighlight">\(sigma = 0.3*((ks-1)*0.5-1)+0.8\)</span>.
+Defaults to 11</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="lib.modules.core.codec.msra_heatmap.MSRAHeatmap.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lib/modules/core/codec/msra_heatmap.html#MSRAHeatmap.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.msra_heatmap.MSRAHeatmap.decode" title="Permalink to this definition"></a></dt>
+<dd><p>Decode keypoint coordinates from heatmaps. The decoded keypoint
+coordinates are in the input image space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>encoded</strong> (<em>np.ndarray</em>) – Heatmaps in shape (K, H, W)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><dl class="simple">
+<dt>keypoints (np.ndarray): Decoded keypoint coordinates in shape</dt><dd><p>(N, K, D)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>scores (np.ndarray): The keypoint scores in shape (N, K). It</dt><dd><p>usually represents the confidence of the keypoint prediction</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lib.modules.core.codec.msra_heatmap.MSRAHeatmap.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keypoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keypoints_visible</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lib/modules/core/codec/msra_heatmap.html#MSRAHeatmap.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lib.modules.core.codec.msra_heatmap.MSRAHeatmap.encode" title="Permalink to this definition"></a></dt>
+<dd><p>Encode keypoints into heatmaps. Note that the original keypoint
+coordinates should be in the input image space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keypoints</strong> (<em>np.ndarray</em>) – Keypoint coordinates in shape (N, K, D)</p></li>
+<li><p><strong>keypoints_visible</strong> (<em>np.ndarray</em>) – Keypoint visibilities in shape
+(N, K)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><dl class="simple">
+<dt>heatmaps (np.ndarray): The generated heatmap in shape</dt><dd><p>(K, H, W) where [W, H] is the <cite>heatmap_size</cite></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>keypoint_weights (np.ndarray): The target weights in shape</dt><dd><p>(N, K)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lib.modules.core.codec.heatmap_utils.html" class="btn btn-neutral float-left" title="lib.modules.core.codec.heatmap_utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lib.modules.core.SpatialArgmax2d.html" class="btn btn-neutral float-right" title="lib.modules.core.SpatialArgmax2d module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andy Tam Yiu Chau.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

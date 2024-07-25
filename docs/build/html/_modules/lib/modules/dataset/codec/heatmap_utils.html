@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lib.modules.dataset.codec.heatmap_utils &mdash; Posture Experiment 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../../_static/copybutton.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            Posture Experiment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../project_organization.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../code_running.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../experiments.html">Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference_index.html">Reference Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Posture Experiment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">lib.modules.dataset.codec.heatmap_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for lib.modules.dataset.codec.heatmap_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="c1">#### Generation of heatmaps ####</span>
+<div class="viewcode-block" id="generate_gaussian_heatmaps"><a class="viewcode-back" href="../../../../../api/lib.modules.dataset.codec.heatmap_utils.html#lib.modules.dataset.codec.heatmap_utils.generate_gaussian_heatmaps">[docs]</a><span class="k">def</span> <span class="nf">generate_gaussian_heatmaps</span><span class="p">(</span>
+    <span class="n">heatmap_size</span><span class="p">,</span>
+    <span class="n">keypoints</span><span class="p">,</span>
+    <span class="n">keypoints_visible</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate gaussian heatmaps of keypoints.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        heatmap_size (Tuple[int, int]): Heatmap size in [W, H]</span>
+<span class="sd">        keypoints (np.ndarray): Keypoint coordinates in shape (N, K, D)</span>
+<span class="sd">        keypoints_visible (np.ndarray): Keypoint visibilities in shape</span>
+<span class="sd">            (N, K)</span>
+<span class="sd">        sigma (float or List[float]): A list of sigma values of the Gaussian</span>
+<span class="sd">            heatmap for each instance. If sigma is given as a single float</span>
+<span class="sd">            value, it will be expanded into a tuple</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple:</span>
+<span class="sd">        - heatmaps (np.ndarray): The generated heatmap in shape</span>
+<span class="sd">            (K, H, W) where [W, H] is the `heatmap_size`</span>
+<span class="sd">        - keypoint_weights (np.ndarray): The target weights in shape</span>
+<span class="sd">            (N, K)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">keypoints</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="n">heatmap_size</span>
+
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">K</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">keypoint_weights</span> <span class="o">=</span> <span class="n">keypoints_visible</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma</span><span class="p">,)</span> <span class="o">*</span> <span class="n">N</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="c1"># 3-sigma rule</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">sigma</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+
+        <span class="c1"># xy grid</span>
+        <span class="n">gaussian_size</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gaussian_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">gaussian_size</span> <span class="o">//</span> <span class="mi">2</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+            <span class="c1"># skip unlabled keypoints</span>
+            <span class="k">if</span> <span class="n">keypoints_visible</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># get gaussian center coordinates</span>
+            <span class="n">mu</span> <span class="o">=</span> <span class="p">(</span><span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+            <span class="c1"># check that the gaussian has in-bounds part</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="p">(</span><span class="n">mu</span> <span class="o">-</span> <span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="p">(</span><span class="n">mu</span> <span class="o">+</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;=</span> <span class="n">W</span> <span class="ow">or</span> <span class="n">top</span> <span class="o">&gt;=</span> <span class="n">H</span> <span class="ow">or</span> <span class="n">right</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">bottom</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">keypoint_weights</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># The gaussian is not normalized,</span>
+            <span class="c1"># we want the center value to equal 1</span>
+            <span class="n">gaussian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+            <span class="c1"># valid range in gaussian</span>
+            <span class="n">g_x1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">left</span><span class="p">)</span>
+            <span class="n">g_x2</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span> <span class="o">-</span> <span class="n">left</span>
+            <span class="n">g_y1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">top</span><span class="p">)</span>
+            <span class="n">g_y2</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)</span> <span class="o">-</span> <span class="n">top</span>
+
+            <span class="c1"># valid range in heatmap</span>
+            <span class="n">h_x1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">left</span><span class="p">)</span>
+            <span class="n">h_x2</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+            <span class="n">h_y1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">top</span><span class="p">)</span>
+            <span class="n">h_y2</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)</span>
+
+            <span class="n">heatmap_region</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">h_y1</span><span class="p">:</span><span class="n">h_y2</span><span class="p">,</span> <span class="n">h_x1</span><span class="p">:</span><span class="n">h_x2</span><span class="p">]</span>
+            <span class="n">gaussian_regsion</span> <span class="o">=</span> <span class="n">gaussian</span><span class="p">[</span><span class="n">g_y1</span><span class="p">:</span><span class="n">g_y2</span><span class="p">,</span> <span class="n">g_x1</span><span class="p">:</span><span class="n">g_x2</span><span class="p">]</span>
+
+            <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">heatmap_region</span><span class="p">,</span> <span class="n">gaussian_regsion</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">heatmap_region</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">heatmaps</span><span class="p">,</span> <span class="n">keypoint_weights</span></div>
+
+
+<div class="viewcode-block" id="generate_unbiased_gaussian_heatmaps"><a class="viewcode-back" href="../../../../../api/lib.modules.dataset.codec.heatmap_utils.html#lib.modules.dataset.codec.heatmap_utils.generate_unbiased_gaussian_heatmaps">[docs]</a><span class="k">def</span> <span class="nf">generate_unbiased_gaussian_heatmaps</span><span class="p">(</span>
+    <span class="n">heatmap_size</span><span class="p">,</span>
+    <span class="n">keypoints</span><span class="p">,</span>
+    <span class="n">keypoints_visible</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate gaussian heatmaps of keypoints using `Dark Pose`_.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        heatmap_size (Tuple[int, int]): Heatmap size in [W, H]</span>
+<span class="sd">        keypoints (np.ndarray): Keypoint coordinates in shape (N, K, D)</span>
+<span class="sd">        keypoints_visible (np.ndarray): Keypoint visibilities in shape</span>
+<span class="sd">            (N, K)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple:</span>
+<span class="sd">        - heatmaps (np.ndarray): The generated heatmap in shape</span>
+<span class="sd">            (K, H, W) where [W, H] is the `heatmap_size`</span>
+<span class="sd">        - keypoint_weights (np.ndarray): The target weights in shape</span>
+<span class="sd">            (N, K)</span>
+
+<span class="sd">    .. _`Dark Pose`: https://arxiv.org/abs/1910.06278</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">keypoints</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="n">heatmap_size</span>
+
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">K</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">keypoint_weights</span> <span class="o">=</span> <span class="n">keypoints_visible</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># 3-sigma rule</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="mi">3</span>
+
+    <span class="c1"># xy grid</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">)):</span>
+        <span class="c1"># skip unlabled keypoints</span>
+        <span class="k">if</span> <span class="n">keypoints_visible</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+        <span class="c1"># check that the gaussian has in-bounds part</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">-</span> <span class="n">radius</span>
+        <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;=</span> <span class="n">W</span> <span class="ow">or</span> <span class="n">top</span> <span class="o">&gt;=</span> <span class="n">H</span> <span class="ow">or</span> <span class="n">right</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">bottom</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">keypoint_weights</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">continue</span>
+
+        <span class="n">gaussian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">gaussian</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">out</span><span class="o">=</span><span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">heatmaps</span><span class="p">,</span> <span class="n">keypoint_weights</span></div>
+
+
+<div class="viewcode-block" id="get_heatmap_maximum"><a class="viewcode-back" href="../../../../../api/lib.modules.dataset.codec.heatmap_utils.html#lib.modules.dataset.codec.heatmap_utils.get_heatmap_maximum">[docs]</a><span class="k">def</span> <span class="nf">get_heatmap_maximum</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get maximum response location and value from heatmaps.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        batch_size: B</span>
+<span class="sd">        num_keypoints: K</span>
+<span class="sd">        heatmap height: H</span>
+<span class="sd">        heatmap width: W</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        heatmaps (np.ndarray): Heatmaps in shape (K, H, W) or (B, K, H, W)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple:</span>
+<span class="sd">        - locs (np.ndarray): locations of maximum heatmap responses in shape</span>
+<span class="sd">            (K, 2) or (B, K, 2)</span>
+<span class="sd">        - vals (np.ndarray): values of maximum heatmap responses in shape</span>
+<span class="sd">            (K,) or (B, K)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">),</span> <span class="s2">&quot;heatmaps should be numpy.ndarray&quot;</span>
+    <span class="k">assert</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Invalid shape </span><span class="si">{</span><span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">heatmaps_flatten</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">heatmaps_flatten</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span> <span class="o">*</span> <span class="n">K</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">y_locs</span><span class="p">,</span> <span class="n">x_locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">heatmaps_flatten</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+    <span class="n">locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">x_locs</span><span class="p">,</span> <span class="n">y_locs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">heatmaps_flatten</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">locs</span><span class="p">[</span><span class="n">vals</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">B</span><span class="p">:</span>
+        <span class="n">locs</span> <span class="o">=</span> <span class="n">locs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">locs</span><span class="p">,</span> <span class="n">vals</span></div>
+
+
+<div class="viewcode-block" id="refine_keypoints"><a class="viewcode-back" href="../../../../../api/lib.modules.dataset.codec.heatmap_utils.html#lib.modules.dataset.codec.heatmap_utils.refine_keypoints">[docs]</a><span class="k">def</span> <span class="nf">refine_keypoints</span><span class="p">(</span><span class="n">keypoints</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Refine keypoint predictions by moving from the maximum towards the</span>
+<span class="sd">    second maximum by 0.25 pixel. The operation is in-place.</span>
+
+<span class="sd">    Note:</span>
+
+<span class="sd">        - instance number: N</span>
+<span class="sd">        - keypoint number: K</span>
+<span class="sd">        - keypoint dimension: D</span>
+<span class="sd">        - heatmap size: [W, H]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        keypoints (np.ndarray): The keypoint coordinates in shape (N, K, D)</span>
+<span class="sd">        heatmaps (np.ndarray): The heatmaps in shape (K, H, W)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Refine keypoint coordinates in shape (N, K, D)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="n">keypoints</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">)):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">W</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">H</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">H</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">W</span><span class="p">:</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">([</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.25</span>
+
+    <span class="k">return</span> <span class="n">keypoints</span></div>
+
+
+<span class="k">def</span> <span class="nf">refine_keypoints_dark</span><span class="p">(</span>
+    <span class="n">keypoints</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">blur_kernel_size</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Refine keypoint predictions using distribution aware coordinate</span>
+<span class="sd">    decoding. See `Dark Pose`_ for details. The operation is in-place.</span>
+
+<span class="sd">    Note:</span>
+
+<span class="sd">        - instance number: N</span>
+<span class="sd">        - keypoint number: K</span>
+<span class="sd">        - keypoint dimension: D</span>
+<span class="sd">        - heatmap size: [W, H]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        keypoints (np.ndarray): The keypoint coordinates in shape (N, K, D)</span>
+<span class="sd">        heatmaps (np.ndarray): The heatmaps in shape (K, H, W)</span>
+<span class="sd">        blur_kernel_size (int): The Gaussian blur kernel size of the heatmap</span>
+<span class="sd">            modulation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Refine keypoint coordinates in shape (N, K, D)</span>
+
+<span class="sd">    .. _`Dark Pose`: https://arxiv.org/abs/1910.06278</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="n">keypoints</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># modulate heatmaps</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">gaussian_blur</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">blur_kernel_size</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">)):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">W</span> <span class="o">-</span> <span class="mi">2</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">H</span> <span class="o">-</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>
+
+            <span class="n">dxx</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">dxy</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">dyy</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">derivative</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">dx</span><span class="p">],</span> <span class="p">[</span><span class="n">dy</span><span class="p">]])</span>
+            <span class="n">hessian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">dxx</span><span class="p">,</span> <span class="n">dxy</span><span class="p">],</span> <span class="p">[</span><span class="n">dxy</span><span class="p">,</span> <span class="n">dyy</span><span class="p">]])</span>
+            <span class="k">if</span> <span class="n">dxx</span> <span class="o">*</span> <span class="n">dyy</span> <span class="o">-</span> <span class="n">dxy</span><span class="o">**</span><span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">hessianinv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hessian</span><span class="p">)</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="o">-</span><span class="n">hessianinv</span> <span class="o">@</span> <span class="n">derivative</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">offset</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">offset</span>
+    <span class="k">return</span> <span class="n">keypoints</span>
+
+
+<div class="viewcode-block" id="refine_keypoints_dark"><a class="viewcode-back" href="../../../../../api/lib.modules.dataset.codec.heatmap_utils.html#lib.modules.dataset.codec.heatmap_utils.refine_keypoints_dark">[docs]</a><span class="k">def</span> <span class="nf">refine_keypoints_dark</span><span class="p">(</span>
+    <span class="n">keypoints</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">blur_kernel_size</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Refine keypoint predictions using distribution aware coordinate</span>
+<span class="sd">    decoding. See `Dark Pose`_ for details. The operation is in-place.</span>
+
+<span class="sd">    Note:</span>
+
+<span class="sd">        - instance number: N</span>
+<span class="sd">        - keypoint number: K</span>
+<span class="sd">        - keypoint dimension: D</span>
+<span class="sd">        - heatmap size: [W, H]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        keypoints (np.ndarray): The keypoint coordinates in shape (N, K, D)</span>
+<span class="sd">        heatmaps (np.ndarray): The heatmaps in shape (K, H, W)</span>
+<span class="sd">        blur_kernel_size (int): The Gaussian blur kernel size of the heatmap</span>
+<span class="sd">            modulation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Refine keypoint coordinates in shape (N, K, D)</span>
+
+<span class="sd">    .. _`Dark Pose`: https://arxiv.org/abs/1910.06278</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="n">keypoints</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># modulate heatmaps</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">gaussian_blur</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">blur_kernel_size</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">)):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">W</span> <span class="o">-</span> <span class="mi">2</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">H</span> <span class="o">-</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>
+
+            <span class="n">dxx</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">dxy</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">dyy</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">derivative</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">dx</span><span class="p">],</span> <span class="p">[</span><span class="n">dy</span><span class="p">]])</span>
+            <span class="n">hessian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">dxx</span><span class="p">,</span> <span class="n">dxy</span><span class="p">],</span> <span class="p">[</span><span class="n">dxy</span><span class="p">,</span> <span class="n">dyy</span><span class="p">]])</span>
+            <span class="k">if</span> <span class="n">dxx</span> <span class="o">*</span> <span class="n">dyy</span> <span class="o">-</span> <span class="n">dxy</span><span class="o">**</span><span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">hessianinv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hessian</span><span class="p">)</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="o">-</span><span class="n">hessianinv</span> <span class="o">@</span> <span class="n">derivative</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">offset</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">offset</span>
+    <span class="k">return</span> <span class="n">keypoints</span></div>
+
+
+<div class="viewcode-block" id="refine_keypoints_dark_udp"><a class="viewcode-back" href="../../../../../api/lib.modules.dataset.codec.heatmap_utils.html#lib.modules.dataset.codec.heatmap_utils.refine_keypoints_dark_udp">[docs]</a><span class="k">def</span> <span class="nf">refine_keypoints_dark_udp</span><span class="p">(</span>
+    <span class="n">keypoints</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">blur_kernel_size</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Refine keypoint predictions using distribution aware coordinate decoding</span>
+<span class="sd">    for UDP. See `UDP`_ for details. The operation is in-place.</span>
+
+<span class="sd">    Note:</span>
+
+<span class="sd">        - instance number: N</span>
+<span class="sd">        - keypoint number: K</span>
+<span class="sd">        - keypoint dimension: D</span>
+<span class="sd">        - heatmap size: [W, H]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        keypoints (np.ndarray): The keypoint coordinates in shape (N, K, D)</span>
+<span class="sd">        heatmaps (np.ndarray): The heatmaps in shape (K, H, W)</span>
+<span class="sd">        blur_kernel_size (int): The Gaussian blur kernel size of the heatmap</span>
+<span class="sd">            modulation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Refine keypoint coordinates in shape (N, K, D)</span>
+
+<span class="sd">    .. _`UDP`: https://arxiv.org/abs/1911.07524</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="n">keypoints</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># modulate heatmaps</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">gaussian_blur</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">blur_kernel_size</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">heatmaps</span><span class="p">)</span>
+
+    <span class="n">heatmaps_pad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">W</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">+=</span> <span class="p">(</span><span class="n">W</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">H</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">i_</span> <span class="o">=</span> <span class="n">heatmaps_pad</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">ix1</span> <span class="o">=</span> <span class="n">heatmaps_pad</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">iy1</span> <span class="o">=</span> <span class="n">heatmaps_pad</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">ix1y1</span> <span class="o">=</span> <span class="n">heatmaps_pad</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">ix1_y1_</span> <span class="o">=</span> <span class="n">heatmaps_pad</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="n">W</span> <span class="o">-</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">ix1_</span> <span class="o">=</span> <span class="n">heatmaps_pad</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">iy1_</span> <span class="o">=</span> <span class="n">heatmaps_pad</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">W</span><span class="p">]</span>
+
+        <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">ix1</span> <span class="o">-</span> <span class="n">ix1_</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">iy1</span> <span class="o">-</span> <span class="n">iy1_</span><span class="p">)</span>
+        <span class="n">derivative</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">derivative</span> <span class="o">=</span> <span class="n">derivative</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">dxx</span> <span class="o">=</span> <span class="n">ix1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">i_</span> <span class="o">+</span> <span class="n">ix1_</span>
+        <span class="n">dyy</span> <span class="o">=</span> <span class="n">iy1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">i_</span> <span class="o">+</span> <span class="n">iy1_</span>
+        <span class="n">dxy</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">ix1y1</span> <span class="o">-</span> <span class="n">ix1</span> <span class="o">-</span> <span class="n">iy1</span> <span class="o">+</span> <span class="n">i_</span> <span class="o">+</span> <span class="n">i_</span> <span class="o">-</span> <span class="n">ix1_</span> <span class="o">-</span> <span class="n">iy1_</span> <span class="o">+</span> <span class="n">ix1_y1_</span><span class="p">)</span>
+        <span class="n">hessian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">dxx</span><span class="p">,</span> <span class="n">dxy</span><span class="p">,</span> <span class="n">dxy</span><span class="p">,</span> <span class="n">dyy</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">hessian</span> <span class="o">=</span> <span class="n">hessian</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">hessian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hessian</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">keypoints</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;imn,ink-&gt;imk&quot;</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> <span class="n">derivative</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">keypoints</span></div>
+
+
+<div class="viewcode-block" id="gaussian_blur"><a class="viewcode-back" href="../../../../../api/lib.modules.dataset.codec.heatmap_utils.html#lib.modules.dataset.codec.heatmap_utils.gaussian_blur">[docs]</a><span class="k">def</span> <span class="nf">gaussian_blur</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">kernel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">11</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Modulate heatmap distribution with Gaussian.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        - num_keypoints: K</span>
+<span class="sd">        - heatmap height: H</span>
+<span class="sd">        - heatmap width: W</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        heatmaps (np.ndarray[K, H, W]): model predicted heatmaps.</span>
+<span class="sd">        kernel (int): Gaussian kernel size (K) for modulation, which should</span>
+<span class="sd">            match the heatmap gaussian sigma when training.</span>
+<span class="sd">            K=17 for sigma=3 and k=11 for sigma=2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray ([K, H, W]): Modulated heatmap distribution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">kernel</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="n">border</span> <span class="o">=</span> <span class="p">(</span><span class="n">kernel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+        <span class="n">origin_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">H</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">border</span><span class="p">,</span> <span class="n">W</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">border</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">dr</span><span class="p">[</span><span class="n">border</span><span class="p">:</span><span class="o">-</span><span class="n">border</span><span class="p">,</span> <span class="n">border</span><span class="p">:</span><span class="o">-</span><span class="n">border</span><span class="p">]</span> <span class="o">=</span> <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">GaussianBlur</span><span class="p">(</span><span class="n">dr</span><span class="p">,</span> <span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">kernel</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">dr</span><span class="p">[</span><span class="n">border</span><span class="p">:</span><span class="o">-</span><span class="n">border</span><span class="p">,</span> <span class="n">border</span><span class="p">:</span><span class="o">-</span><span class="n">border</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*=</span> <span class="n">origin_max</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">heatmaps</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Andy Tam Yiu Chau.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
