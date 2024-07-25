@@ -7,6 +7,9 @@
 In this section we demonstrate how to preapre the environment for the experiment. 
 The code is tested on windows, and in theory should also work on linux. 
 
+# Data and checkpoints
+The data and checkpoints can be downloaded from [onedrive](https://connectpolyu-my.sharepoint.com/:f:/g/personal/20106983r_connect_polyu_hk/EtIovZKxnyRDne8C1e1QTYIB7zYpKYPiyEH6SfBf2wGeTQ?e=SdTZqB)
+
 ## Installing related dependecies
 ### Using Windows with conda
 Create the `posture_experiment` python environment based and conda and the provided enviroment.yml
