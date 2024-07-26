@@ -16,6 +16,7 @@ Create the `posture_experiment` python environment based and conda and the provi
 ``` batch
 conda env create -f environment.yml
 conda activate posture_experiment
+pip install -e .
 ```
 ### Building the environment from scratch with conda and pip
 Please be aware that pytorch-lightning and sqlsalchemy are setted to specific version as newer versions introduces breaking changes. 
@@ -155,6 +156,8 @@ cd 06-Posture_Classification
 python generate_runs.py
 :: Running the the list of classification models
 python -m helper.local_run -f runs -s finetune_classification.py
+:: inference the list of classification models
+python -m helper.local_run -f runs -s inference_classification.py
 
 ```
 

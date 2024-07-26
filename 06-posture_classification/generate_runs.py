@@ -7,25 +7,24 @@ def copy_and_write(representation, params):
         f.write(params)
 
 
-# MODELS = [
-#     "ResNet34",
-#     "Resnet50",
-#     "Resnet101",
-#     "Resnet152",
-#     "EfficientNetB0",
-#     "EfficientNetB2",
-#     "EfficientNetB4",
-#     "EfficientNetB7",
-#     "ECA34",
-#     "ECA50",
-#     "ECA101",
-#     "ECA152",
-#     "SACCPA34",
-#     "SACCPA50",
-#     "SACCPA101",
-#     "SACCPA152",
-# ]
-MODELS = ["vit_l_32", "vit_l_16", "vit_h_14", "vit_b_16", "vit_b_32"]
+MODELS = [
+    "ResNet34",
+    "Resnet50",
+    "Resnet101",
+    "Resnet152",
+    "EfficientNetB0",
+    "EfficientNetB2",
+    "EfficientNetB4",
+    "EfficientNetB7",
+    "ECA34",
+    "ECA50",
+    "ECA101",
+    "ECA152",
+    "SACCPA34",
+    "SACCPA50",
+    "SACCPA101",
+    "SACCPA152",
+] + ["vit_l_32", "vit_l_16", "vit_h_14", "vit_b_16", "vit_b_32"]
 
 
 def search_range():

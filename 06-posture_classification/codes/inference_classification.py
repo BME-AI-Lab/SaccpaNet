@@ -12,7 +12,7 @@ from lib.procedures import (
 )
 
 KEYPOINT_MODELS = "SACCPA_sample"
-ckpt_path = "../best-epcoh.ckpt"
+ckpt_path = "../best-epoch.ckpt"
 
 BATCH_SIZE = 1
 default_root_dir = f"./log/{CLASSIFICATION_MODELS}"

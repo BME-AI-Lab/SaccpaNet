@@ -189,7 +189,6 @@ dependencies:
     - google-auth-oauthlib==1.0.0
     - grpcio==1.56.0
     - oauthlib==3.2.2
-    - posture-experiment==0.0.1
     - protobuf==3.20.1
     - pyasn1==0.5.0
     - pyasn1-modules==0.3.0
@@ -197,13 +196,15 @@ dependencies:
     - rsa==4.9
     - tensorboard==2.13.0
     - tensorboard-data-server==0.7.1
-    - torch==2.0.1+cu117
-    - torchaudio==2.0.2+cu117
-    - torchvision==0.15.2+cu117
+    - torchaudio==2.0.2
+    - torchvision==0.15.2
     - tqdm==4.65.0
     - urllib3==1.26.16
     - werkzeug==2.3.6
-variables:
-  TELEGRAM_CHAT_ID: '-294048584'
-  TELEGRAM_TOKEN: 563742338:AAHAXH1FfL7qyi_JN26Cwd8rqkjYF9b9r0E
+    - scikit-learn
+    - opencv-python
+    - pytorch-lightning==1.6.4
+    - SQLAlchemy==1.4.48
+    - torchmetrics
+    - scikit-plot
 prefix: C:\tools\miniconda3\envs\posture_experiment
